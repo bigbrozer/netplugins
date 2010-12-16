@@ -1,4 +1,20 @@
 #!/usr/bin/perl -w
+#===============================================================================
+# Name          : check_cisco_cpu_module.pl
+# Author        : Thibaut COURVOISIER <thibaut.courvoisier-ext@faurecia.com>
+# License       : Creative Commons Attribution-Noncommercial-Share Alike 2.0 France
+# Description   : Check which CPU module is active on Cisco Core Switch.
+#-------------------------------------------------------------------------------
+# This work is licensed under the 
+# Creative Commons Attribution-Noncommercial-Share Alike 2.0 France License.
+# To view a copy of this license, visit
+# http://creativecommons.org/licenses/by-nc-sa/2.0/fr/ or send a letter to
+#
+# Creative Commons
+# 171 Second Street, Suite 300
+# San Francisco, California
+# 94105, USA.
+#===============================================================================
 
 use strict;
 use Net::SNMP;
