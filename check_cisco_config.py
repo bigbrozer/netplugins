@@ -24,8 +24,6 @@
 import os, sys
 from time import strftime, localtime, time
 
-sys.path.append("/usr/local/nagios/libexec/python")
-
 from nagios.plugin.snmp import NagiosPluginSNMP
 
 # Specific class for this plugin

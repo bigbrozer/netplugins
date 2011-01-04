@@ -23,8 +23,6 @@
 #
 import os, sys
 
-sys.path.append("/usr/local/nagios/libexec/python")
-
 from nagios.plugin.snmp import NagiosPluginSNMP
 
 # Specific class for this plugin
