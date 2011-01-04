@@ -21,7 +21,7 @@
 #===============================================================================
 #
 #
-import os, sys
+import os, sys, traceback
 
 from nagios.plugin.snmp import NagiosPluginSNMP
 
@@ -51,42 +51,48 @@ class CheckExtremeAlim(NagiosPluginSNMP):
 
 # The main procedure
 if __name__ == '__main__':
-    progname = os.path.basename(sys.argv[0])
-    progdesc = 'Check hardware (power only) of Extreme devices.'
-    progversion = '$Revision: 1 $'
-    
-    plugin = CheckExtremeAlim(progname, progversion, progdesc)
-    
-    oid_powers_status = '1.3.6.1.4.1.1916.1.1.1.27.1.2'
+    try:
+        progname = os.path.basename(sys.argv[0])
+        progdesc = 'Check hardware (power only) of Extreme devices.'
+        progversion = '$Revision: 1 $'
 
-    if plugin.params.type == 'power':    
-        oid_hard_status = oid_powers_status
+        plugin = CheckExtremeAlim(progname, progversion, progdesc)
 
-    hard_status = plugin.queryNextSnmpOid(oid_hard_status)
-    
-    # Checking state of hardware
-    longoutput = ""
-    output = ""
-    exit_code = 0
-    nbr_error = 0
-    i = 0
-    for power in hard_status:
-        state_code = power[1]
-        power_name = 'Power%d' % i
+        oid_powers_status = '1.3.6.1.4.1.1916.1.1.1.27.1.2'
 
-        if state_code != 2:
-            longoutput += '** %s: %s **\n' % (power_name, plugin.statusname[state_code])
-            nbr_error+=1
-            exit_code = 1
-        else:
-            longoutput += '%s: %s\n' % (power_name, plugin.statusname[state_code])
-        i+=1
+        if plugin.params.type == 'power':
+            oid_hard_status = oid_powers_status
 
-    # Formatting output
-    longoutput = longoutput.rstrip('\n')
-    if exit_code == 1:
-        output = '%d %s health in error !\n' % (nbr_error, plugin.params.type.title())
-        plugin.critical(output + longoutput)
-    elif exit_code == 0:
-        output = '%s health is good.\n' % plugin.params.type.title()
-        plugin.ok(output + longoutput)
+        hard_status = plugin.queryNextSnmpOid(oid_hard_status)
+
+        # Checking state of hardware
+        longoutput = ""
+        output = ""
+        exit_code = 0
+        nbr_error = 0
+        i = 0
+        for power in hard_status:
+            state_code = power[1]
+            power_name = 'Power%d' % i
+
+            if state_code != 2:
+                longoutput += '** %s: %s **\n' % (power_name, plugin.statusname[state_code])
+                nbr_error+=1
+                exit_code = 1
+            else:
+                longoutput += '%s: %s\n' % (power_name, plugin.statusname[state_code])
+            i+=1
+
+        # Formatting output
+        longoutput = longoutput.rstrip('\n')
+        if exit_code == 1:
+            output = '%d %s health in error !\n' % (nbr_error, plugin.params.type.title())
+            plugin.critical(output + longoutput)
+        elif exit_code == 0:
+            output = '%s health is good.\n' % plugin.params.type.title()
+            plugin.ok(output + longoutput)
+    except Exception as e:
+        print "Arrrgh... exception occured ! Please contact DL-ITOP-MONITORING."
+        exc_type, exc_value, exc_traceback = sys.exc_info()
+        traceback.print_exception(exc_type, exc_value, exc_traceback, limit=2, file=sys.stdout)
+        raise SystemExit(3)

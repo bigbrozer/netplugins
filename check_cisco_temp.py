@@ -21,7 +21,7 @@
 #===============================================================================
 #
 #
-import os, sys
+import os, sys, traceback
 
 from nagios.plugin.snmp import NagiosPluginSNMP
 
@@ -50,48 +50,54 @@ class CheckCiscoTEMP(NagiosPluginSNMP):
 
 # The main procedure
 if __name__ == '__main__':
-    progname = os.path.basename(sys.argv[0])
-    progdesc = 'Check all temperature on Cisco devices and alert if one is above thresholds.'
-    progversion = '$Revision: 375 $'
-    
-    plugin = CheckCiscoTEMP(progname, progversion, progdesc)
-    
-    oid_temp_names = '1.3.6.1.4.1.9.9.13.1.3.1.2'
-    oid_temp_values = '1.3.6.1.4.1.9.9.13.1.3.1.3'
+    try:
+        progname = os.path.basename(sys.argv[0])
+        progdesc = 'Check all temperature on Cisco devices and alert if one is above thresholds.'
+        progversion = '$Revision: 375 $'
 
-    temp_values = plugin.queryNextSnmpOid(oid_temp_values)
+        plugin = CheckCiscoTEMP(progname, progversion, progdesc)
 
-    # Checking state of HSRP for all interfaces
-    longoutput = ""
-    output = ""
-    perfdata = "| "
-    exit_code = 0
-    nbr_error = 0
-    for temp in temp_values:
-        tempIndex = temp[0][-1]
-        tempDescr = plugin.querySnmpOid('%s.%s' % (oid_temp_names, tempIndex))
+        oid_temp_names = '1.3.6.1.4.1.9.9.13.1.3.1.2'
+        oid_temp_values = '1.3.6.1.4.1.9.9.13.1.3.1.3'
 
-        if plugin.params.warnthr < temp[1] < plugin.params.critthr:
-            longoutput += '* %s: %d C (>%d) *\n' % (tempDescr[1], temp[1], plugin.params.warnthr)
-            if exit_code != 2: exit_code = 1
-            nbr_error+=1
-        elif temp[1] > plugin.params.critthr:
-            longoutput += '** %s: %d C (>%d) **\n' % (tempDescr[1], temp[1], plugin.params.critthr)
-            exit_code = 2
-            nbr_error+=1
-        elif temp[1] < plugin.params.warnthr:
-            longoutput += '%s: %d C (<%d)\n' % (tempDescr[1], temp[1], plugin.params.warnthr)
-        
-        perfdata += '%s=%dC;%d;%d;; ' % (str(tempDescr[1]).replace(' ', '_').replace('_temperature', ''), temp[1], plugin.params.warnthr, plugin.params.critthr)
-    
-    # Add perfdata
-    longoutput += perfdata
+        temp_values = plugin.queryNextSnmpOid(oid_temp_values)
 
-    # Output to Nagios
-    longoutput = longoutput.rstrip('\n')
-    if exit_code == 1:
-        output = '%d temperature sensor above thresholds !\n' % nbr_error
-        plugin.warning(output + longoutput)
-    elif exit_code == 0:
-        output = 'All temperature sensor are below thresholds.\n'
-        plugin.ok(output + longoutput)
+        # Checking state of HSRP for all interfaces
+        longoutput = ""
+        output = ""
+        perfdata = "| "
+        exit_code = 0
+        nbr_error = 0
+        for temp in temp_values:
+            tempIndex = temp[0][-1]
+            tempDescr = plugin.querySnmpOid('%s.%s' % (oid_temp_names, tempIndex))
+
+            if plugin.params.warnthr < temp[1] < plugin.params.critthr:
+                longoutput += '* %s: %d C (>%d) *\n' % (tempDescr[1], temp[1], plugin.params.warnthr)
+                if exit_code != 2: exit_code = 1
+                nbr_error+=1
+            elif temp[1] > plugin.params.critthr:
+                longoutput += '** %s: %d C (>%d) **\n' % (tempDescr[1], temp[1], plugin.params.critthr)
+                exit_code = 2
+                nbr_error+=1
+            elif temp[1] < plugin.params.warnthr:
+                longoutput += '%s: %d C (<%d)\n' % (tempDescr[1], temp[1], plugin.params.warnthr)
+
+            perfdata += '%s=%dC;%d;%d;; ' % (str(tempDescr[1]).replace(' ', '_').replace('_temperature', ''), temp[1], plugin.params.warnthr, plugin.params.critthr)
+
+        # Add perfdata
+        longoutput += perfdata
+
+        # Output to Nagios
+        longoutput = longoutput.rstrip('\n')
+        if exit_code == 1:
+            output = '%d temperature sensor above thresholds !\n' % nbr_error
+            plugin.warning(output + longoutput)
+        elif exit_code == 0:
+            output = 'All temperature sensor are below thresholds.\n'
+            plugin.ok(output + longoutput)
+    except Exception as e:
+        print "Arrrgh... exception occured ! Please contact DL-ITOP-MONITORING."
+        exc_type, exc_value, exc_traceback = sys.exc_info()
+        traceback.print_exception(exc_type, exc_value, exc_traceback, limit=2, file=sys.stdout)
+        raise SystemExit(3)
