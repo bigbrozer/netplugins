@@ -23,27 +23,34 @@
 #
 import os, sys, traceback
 
-from nagios.plugin.snmp import NagiosPluginSNMP
+try:
+    from nagios.plugin.snmp import NagiosPluginSNMP
+except Exception as e:
+    print "Arrrgh... exception occured ! Please contact DL-ITOP-MONITORING."
+    exc_type, exc_value, exc_traceback = sys.exc_info()
+    traceback.print_exception(exc_type, exc_value, exc_traceback, limit=2, file=sys.stdout)
+    raise SystemExit(3)
 
 # Specific class for this plugin
 class CheckExtremeVRRP(NagiosPluginSNMP):
     def __init__(self, name, version, description):
         super(CheckExtremeVRRP, self).__init__(name, version, description)
         self.vrrp_status = {1: 'initialize', 2: 'backup', 3: 'master'}
-        
+
     def setPluginArguments(self):
         '''Define arguments for the plugin'''
         # Define common arguments
         super(CheckExtremeVRRP, self).setPluginArguments()
-        
+
         # Add extra arguments
-        self.argparser.add_option('-w', action='store', type="int", dest='warnthr', help='Warning threshold, sum of all vrrp status.')
+        self.argparser.add_option('-w', action='store', type="int", dest='warnthr',
+                                  help='Warning threshold, sum of all vrrp status.')
 
     def checkPluginArguments(self):
         '''Check syntax of all arguments'''
         # Check common arguments syntax
         super(CheckExtremeVRRP, self).checkPluginArguments()
-        
+
         # Check extra arguments syntax
         if not self.params.warnthr:
             self.unknown('Missing thresholds ! (options -w)')

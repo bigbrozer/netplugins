@@ -23,7 +23,13 @@
 #
 import os, sys, traceback
 
-from nagios.plugin.snmp import NagiosPluginSNMP
+try:
+    from nagios.plugin.snmp import NagiosPluginSNMP
+except Exception as e:
+    print "Arrrgh... exception occured ! Please contact DL-ITOP-MONITORING."
+    exc_type, exc_value, exc_traceback = sys.exc_info()
+    traceback.print_exception(exc_type, exc_value, exc_traceback, limit=2, file=sys.stdout)
+    raise SystemExit(3)
 
 # Specific class for this plugin
 class CheckCiscoCPU(NagiosPluginSNMP):

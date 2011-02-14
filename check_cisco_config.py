@@ -24,25 +24,31 @@
 import os, sys, traceback
 from time import strftime, localtime, time
 
-from nagios.plugin.snmp import NagiosPluginSNMP
+try:
+    from nagios.plugin.snmp import NagiosPluginSNMP
+except Exception as e:
+    print "Arrrgh... exception occured ! Please contact DL-ITOP-MONITORING."
+    exc_type, exc_value, exc_traceback = sys.exc_info()
+    traceback.print_exception(exc_type, exc_value, exc_traceback, limit=2, file=sys.stdout)
+    raise SystemExit(3)
 
 # Specific class for this plugin
 class CheckCiscoConfig(NagiosPluginSNMP):
     def __init__(self, name, version, description):
         super(CheckCiscoConfig, self).__init__(name, version, description)
-        
+
     def setPluginArguments(self):
         '''Define arguments for the plugin'''
         # Define common arguments
         super(CheckCiscoConfig, self).setPluginArguments()
-        
+
         # Add extra arguments
 
     def checkPluginArguments(self):
         '''Check syntax of all arguments'''
         # Check common arguments syntax
         super(CheckCiscoConfig, self).checkPluginArguments()
-        
+
         # Check extra arguments syntax
 
 # The main procedure
@@ -66,11 +72,12 @@ if __name__ == '__main__':
         delta_time_changed = (long(uptime[1]) - long(config_last_changed[1])) / 100
         delta_time_saved = (long(uptime[1]) - long(config_last_saved[1])) / 100
 
-        config_last_changed_date = strftime('%d/%m/%Y %H:%M', localtime(time()-delta_time_changed))
-        config_last_saved_date = strftime('%d/%m/%Y %H:%M', localtime(time()-delta_time_saved))
+        config_last_changed_date = strftime('%d/%m/%Y %H:%M', localtime(time() - delta_time_changed))
+        config_last_saved_date = strftime('%d/%m/%Y %H:%M', localtime(time() - delta_time_saved))
 
         # Formating output
-        longoutput = 'Config last changed: %s\nConfig last saved: %s' % (config_last_changed_date, config_last_saved_date)
+        longoutput = 'Config last changed: %s\nConfig last saved: %s' % (
+        config_last_changed_date, config_last_saved_date)
 
         # Checking state of config date
         if config_last_changed[1] > config_last_saved[1]:

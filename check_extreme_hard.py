@@ -23,7 +23,13 @@
 #
 import os, sys, traceback
 
-from nagios.plugin.snmp import NagiosPluginSNMP
+try:
+    from nagios.plugin.snmp import NagiosPluginSNMP
+except Exception as e:
+    print "Arrrgh... exception occured ! Please contact DL-ITOP-MONITORING."
+    exc_type, exc_value, exc_traceback = sys.exc_info()
+    traceback.print_exception(exc_type, exc_value, exc_traceback, limit=2, file=sys.stdout)
+    raise SystemExit(3)
 
 # Specific class for this plugin
 class CheckExtremeAlim(NagiosPluginSNMP):
@@ -31,20 +37,21 @@ class CheckExtremeAlim(NagiosPluginSNMP):
         super(CheckExtremeAlim, self).__init__(name, version, description)
         # 1normal,2warning,3critical,4shutdown,5notPresent,6notFunctioning
         self.statusname = {1: 'Not present', 2: 'Normal', 3: 'Error'}
-        
+
     def setPluginArguments(self):
         '''Define arguments for the plugin'''
         # Define common arguments
         super(CheckExtremeAlim, self).setPluginArguments()
-        
+
         # Add extra arguments
-        self.argparser.add_option('-T', '--type', action='store', type="choice", choices=['power'], dest='type', help='Type of hardware to check (choices: power)')
+        self.argparser.add_option('-T', '--type', action='store', type="choice", choices=['power'], dest='type',
+                                  help='Type of hardware to check (choices: power)')
 
     def checkPluginArguments(self):
         '''Check syntax of all arguments'''
         # Check common arguments syntax
         super(CheckExtremeAlim, self).checkPluginArguments()
-        
+
         # Check extra arguments syntax
         if not self.params.type:
             self.unknown('Missing type of hardware to check for ! (options -T or --type)')
@@ -77,11 +84,11 @@ if __name__ == '__main__':
 
             if state_code != 2:
                 longoutput += '** %s: %s **\n' % (power_name, plugin.statusname[state_code])
-                nbr_error+=1
+                nbr_error += 1
                 exit_code = 1
             else:
                 longoutput += '%s: %s\n' % (power_name, plugin.statusname[state_code])
-            i+=1
+            i += 1
 
         # Formatting output
         longoutput = longoutput.rstrip('\n')
