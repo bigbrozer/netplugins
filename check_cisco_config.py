@@ -69,22 +69,26 @@ if __name__ == '__main__':
         config_last_saved = plugin.querySnmpOid(oid_config_last_saved)
 
         # Date calculations
-        delta_time_changed = (long(uptime[1]) - long(config_last_changed[1])) / 100
-        delta_time_saved = (long(uptime[1]) - long(config_last_saved[1])) / 100
+        delta_time_changed = abs(long(uptime[1]) - long(config_last_changed[1])) / 100
+        delta_time_saved = abs(long(uptime[1]) - long(config_last_saved[1])) / 100
 
-        config_last_changed_date = strftime('%d/%m/%Y %H:%M', localtime(time() - delta_time_changed))
-        config_last_saved_date = strftime('%d/%m/%Y %H:%M', localtime(time() - delta_time_saved))
+        config_last_changed_date = localtime(time() - delta_time_changed)
+        config_last_changed_date_str = strftime('%d/%m/%Y %H:%M', config_last_changed_date)
+        config_last_saved_date = localtime(time() - delta_time_saved)
+        config_last_saved_date_str = strftime('%d/%m/%Y %H:%M', config_last_saved_date)
 
         # Formating output
         longoutput = 'Config last changed: %s\nConfig last saved: %s' % (
-        config_last_changed_date, config_last_saved_date)
+            config_last_changed_date_str,
+            config_last_saved_date_str,
+        )
 
         # Checking state of config date
-        if config_last_changed[1] > config_last_saved[1]:
-            output = 'Config was changed without saving on %s !\n' % config_last_changed_date
+        if config_last_changed_date > config_last_saved_date:
+            output = 'Config was changed without saving on %s !\n' % config_last_changed_date_str
             plugin.warning(output + longoutput)
         else:
-            output = 'Running configuration was saved on %s.\n' % config_last_saved_date
+            output = 'Running configuration was saved on %s.\n' % config_last_saved_date_str
             plugin.ok(output + longoutput)
     except Exception as e:
         print "Arrrgh... exception occured ! Please contact DL-ITOP-MONITORING."
