@@ -128,7 +128,7 @@ sub temp_sensor {
 		
 		
 	if($cpt_error >= 1 ){
-	$nagios_output = "Click to see that temperature sensor is above the threshold | 'Sensor_1'=".$temp."C;55;70 'Sensor_2'=".$temp2."C;55;70";
+	$nagios_output = "Click to see that temperature sensor is above the threshold | 'Sensor_1'=".$temp."C;55;70; 'Sensor_2'=".$temp2."C;55;70;";
 	$nagios_long_output .= "Primary sensor: ".$temp."\n";
     $nagios_long_output .= "Secondary sensor: ".$temp2."\n";
 	$nagios_output .= "\n".$nagios_long_output;
@@ -138,7 +138,7 @@ sub temp_sensor {
 	}
 	
 	else{
-    $nagios_output = "OK: Temperature sensor are in good health. | 'Sensor_1'=".$temp."C;55;70 'Sensor_2'=".$temp2."C;55;70\n";    
+    $nagios_output = "OK: Temperature sensor are in good health. | 'Sensor_1'=".$temp."C;55;70; 'Sensor_2'=".$temp2."C;55;70;\n";    
     $nagios_long_output .= "Primary sensor: ".$temp."\n";
     $nagios_long_output .= "Secondary sensor: ".$temp2."\n";
 
