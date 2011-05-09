@@ -64,5 +64,5 @@ CLOCKDECBIS=$(($CLOCKDEC-$CSTE))
 CLOCKUNIX=`date -d @"$CLOCKDECBIS"`
 
 echo $CLOCKUNIX
-exit 3
+exit 0
 esac

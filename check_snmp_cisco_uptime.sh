@@ -1,5 +1,6 @@
 #! /bin/sh
 
+## 2006-10-23, Ingo Lantschner (based on the work of Fredrik Wanglund)
 ## This Plugin return the uptime for a cisco swith/router
 
 PATH=/bin:/sbin:/usr/bin:/usr/sbin:/usr/local/bin:/usr/local/sbin

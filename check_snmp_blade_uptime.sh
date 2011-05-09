@@ -84,6 +84,6 @@ if [[ "$DATEY" -eq "$CISCOY" && "$DATEM" -eq "$CISCOM" && "$DATED" -eq "`expr $C
          fi
 		 
 echo "No problem, the blade hasn't rebooted recently"
-exit 3
+exit 0
 
 esac
