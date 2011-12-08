@@ -4,8 +4,6 @@
 #===============================================================================
 # Name          : check_cisco_temp.py
 # Author        : Vincent BESANCON aka 'v!nZ' <elguapito@free.fr>
-# Version       : $Revision: 375 $
-# Last Modified : $Date: 2010-02-12 15:58:17 +0100 (ven., 12 févr. 2010) $
 # License       : Creative Commons Attribution-Noncommercial-Share Alike 2.0 France
 # Description   : Check all temperature on Cisco devices and alert if one is above thresholds.
 #-------------------------------------------------------------------------------
@@ -61,7 +59,7 @@ if __name__ == '__main__':
     try:
         progname = os.path.basename(sys.argv[0])
         progdesc = 'Check all temperature on Cisco devices and alert if one is above thresholds.'
-        progversion = '$Revision: 375 $'
+        progversion = '1.0'
 
         plugin = CheckCiscoTEMP(progname, progversion, progdesc)
 

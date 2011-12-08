@@ -5,8 +5,6 @@
 # Name          : check_cisco_config.py
 # Authors       : Vincent BESANCON aka 'v!nZ' <elguapito@free.fr>
 #                 Julien DORMOY aka Fusionwork <dormoyjuju@free.fr>
-# Version       : $Revision$
-# Last Modified : $Date$
 # License       : Creative Commons Attribution-Noncommercial-Share Alike 2.0 France
 # Description   : Check config last change and last saved date time.
 #-------------------------------------------------------------------------------
@@ -56,7 +54,7 @@ if __name__ == '__main__':
     try:
         progname = os.path.basename(sys.argv[0])
         progdesc = 'Check config last change and last saved date time.'
-        progversion = '$Revision: 1 $'
+        progversion = '1.0'
 
         plugin = CheckCiscoConfig(progname, progversion, progdesc)
 

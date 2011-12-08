@@ -59,7 +59,7 @@ if __name__ == '__main__':
     try:
         progname = os.path.basename(sys.argv[0])
         progdesc = 'Check HSRP on Cisco devices. Check if the router must be the active or standby router for VLANs.'
-        progversion = '$Revision: 1 $'
+        progversion = '1.0'
 
         plugin = CheckCiscoHSRP(progname, progversion, progdesc)
 

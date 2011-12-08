@@ -4,8 +4,6 @@
 #===============================================================================
 # Name          : check_cisco_cpu.py
 # Author        : Vincent BESANCON aka 'v!nZ' <elguapito@free.fr>
-# Version       : $Revision$
-# Last Modified : $Date$
 # License       : Creative Commons Attribution-Noncommercial-Share Alike 2.0 France
 # Description   : Check all CPUs usage on Cisco devices supporting CISCO-PROCESS-MIB.
 #-------------------------------------------------------------------------------
@@ -37,7 +35,7 @@ class CheckCiscoCPU(NagiosPluginSNMP):
         super(CheckCiscoCPU, self).__init__(name, version, description)
         
     def setPluginArguments(self):
-        '''Define arguments for the plugin'''
+        """Define arguments for the plugin"""
         # Define common arguments
         super(CheckCiscoCPU, self).setPluginArguments()
         
@@ -46,7 +44,7 @@ class CheckCiscoCPU(NagiosPluginSNMP):
         self.argparser.add_option('-c', action='store', type="int", dest='critthr', help='Critical threshold in percent (eg. 90)')
 
     def checkPluginArguments(self):
-        '''Check syntax of all arguments'''
+        """Check syntax of all arguments"""
         # Check common arguments syntax
         super(CheckCiscoCPU, self).checkPluginArguments()
         
@@ -59,7 +57,7 @@ if __name__ == '__main__':
     try:
         progname = os.path.basename(sys.argv[0])
         progdesc = 'Check all CPUs usage on Cisco devices supporting CISCO-PROCESS-MIB.'
-        progversion = '$Revision: 1 $'
+        progversion = '1.0'
 
         plugin = CheckCiscoCPU(progname, progversion, progdesc)
 

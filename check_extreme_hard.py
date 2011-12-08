@@ -4,8 +4,6 @@
 #===============================================================================
 # Name          : check_extreme_hard.py
 # Author        : Vincent BESANCON aka 'v!nZ' <elguapito@free.fr>
-# Version       : $Revision$
-# Last Modified : $Date$
 # License       : Creative Commons Attribution-Noncommercial-Share Alike 2.0 France
 # Description   : Check hardware (power only) of Extreme devices.
 #-------------------------------------------------------------------------------
@@ -61,7 +59,7 @@ if __name__ == '__main__':
     try:
         progname = os.path.basename(sys.argv[0])
         progdesc = 'Check hardware (power only) of Extreme devices.'
-        progversion = '$Revision: 1 $'
+        progversion = '1.0'
 
         plugin = CheckExtremeAlim(progname, progversion, progdesc)
 

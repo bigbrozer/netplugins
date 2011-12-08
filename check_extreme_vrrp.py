@@ -5,8 +5,6 @@
 # Name          : check_extreme_vrrp.py
 # Authors       : Vincent BESANCON aka 'v!nZ' <elguapito@free.fr>
 #                 Julien DORMOY aka Fusionwork <dormoyjuju@free.fr>
-# Version       : $Revision: 417 $
-# Last Modified : $Date: 2010-03-02 12:58:51 +0100 (mar., 02 mars 2010) $
 # License       : Creative Commons Attribution-Noncommercial-Share Alike 2.0 France
 # Description   : Check VRRP status of VLAN on Extreme Core devices.
 #-------------------------------------------------------------------------------
@@ -60,7 +58,7 @@ if __name__ == '__main__':
     try:
         progname = os.path.basename(sys.argv[0])
         progdesc = 'Check VRRP status of VLAN on Extreme Core devices.'
-        progversion = '$Revision: 417 $'
+        progversion = '1.0'
 
         plugin = CheckExtremeVRRP(progname, progversion, progdesc)
 
