@@ -35,7 +35,7 @@ class CheckCiscoTEMP(NagiosPluginSNMP):
         super(CheckCiscoTEMP, self).__init__(name, version, description)
 
     def setPluginArguments(self):
-        '''Define arguments for the plugin'''
+        """Define arguments for the plugin"""""
         # Define common arguments
         super(CheckCiscoTEMP, self).setPluginArguments()
 
@@ -46,7 +46,7 @@ class CheckCiscoTEMP(NagiosPluginSNMP):
                                   help='Critical threshold in percent (eg. 90)')
 
     def checkPluginArguments(self):
-        '''Check syntax of all arguments'''
+        """Check syntax of all arguments"""""
         # Check common arguments syntax
         super(CheckCiscoTEMP, self).checkPluginArguments()
 
@@ -98,6 +98,7 @@ if __name__ == '__main__':
 
         # Output to Nagios
         longoutput = longoutput.rstrip('\n')
+        #noinspection PySimplifyBooleanCheck
         if exit_code == 1:
             output = '%d temperature sensor above thresholds !\n' % nbr_error
             plugin.warning(output + longoutput)
