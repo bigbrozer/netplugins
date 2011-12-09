@@ -68,16 +68,19 @@ if __name__ == '__main__':
         cpu_indexes = plugin.queryNextSnmpOid(oid_cpu_indexes)
         cpu_usages = plugin.queryNextSnmpOid(oid_cpu_usages)
 
+        if not len(cpu_usages):
+            plugin.unknown('SNMP query error: query returned no result !')
+            
         cpu_data = {}
-        for i in range(0, len(cpu_indexes)):
-            cpu_name = str(plugin.querySnmpOid('%s.%s' % (oid_entity_name, cpu_indexes[i][1]))[1])
-
-            # Test if there is a description, if not generate one
-            if len(cpu_name) == 0:
+        for i in range(0, len(cpu_usages)):
+            try:
+                cpu_name = str(plugin.querySnmpOid('%s.%s' % (oid_entity_name, cpu_indexes[i][1]))[1])
+            except IndexError:
+                # Set a default name for the CPU module
                 cpu_name = 'CPU%d' % i
 
+            plugin.debug('CPU name: %s' % cpu_name)
             cpu_data[cpu_name] = int(cpu_usages[i][1])
-
 
         # Checking values if in thresholds and formatting output
         output = ""
@@ -104,6 +107,7 @@ if __name__ == '__main__':
 
         # Output to Nagios
         longoutput = longoutput.rstrip('\n')
+        #noinspection PySimplifyBooleanCheck
         if exit_code == 0:
             output = 'All CPU usage are below thresholds.\n'
             longoutput += perfdata
