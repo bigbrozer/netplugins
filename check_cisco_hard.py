@@ -33,79 +33,45 @@ except Exception as e:
 class CheckCiscoHard(NagiosPluginSNMP):
     def __init__(self, name, version, description):
         super(CheckCiscoHard, self).__init__(name, version, description)
-        # 1normal,2warning,3critical,4shutdown,5notPresent,6notFunctioning
-        self.statusname = {1: 'Normal', 2: 'Warning', 3: 'Critical', 4: 'Shutdown', 5: 'Not present',
-                           6: 'Not functioning'}
-
-    def setPluginArguments(self):
-        '''Define arguments for the plugin'''
-        # Define common arguments
-        super(CheckCiscoHard, self).setPluginArguments()
-
-        # Add extra arguments
-        self.argparser.add_option('-T', '--type', action='store', type="choice", choices=['sensor', 'fan', 'power'],
-                                  dest='type', help='Type of hardware to check (thermal, fan or power)')
-
-    def checkPluginArguments(self):
-        '''Check syntax of all arguments'''
-        # Check common arguments syntax
-        super(CheckCiscoHard, self).checkPluginArguments()
-
-        # Check extra arguments syntax
-        if not self.params.type:
-            self.unknown('Missing type of hardware to check for ! (options -T or --type)')
 
 # The main procedure
 if __name__ == '__main__':
     try:
         progname = os.path.basename(sys.argv[0])
         progdesc = 'Check hardware (sensors, fans, power) of Cisco devices.'
-        progversion = '1.0'
+        progversion = '1.2'
 
         plugin = CheckCiscoHard(progname, progversion, progdesc)
 
-        oid_sensors_names = '1.3.6.1.4.1.9.9.13.1.3.1.2'
-        oid_fans_names = '1.3.6.1.4.1.9.9.13.1.4.1.2'
-        oid_powers_names = '1.3.6.1.4.1.9.9.13.1.5.1.2'
+        oid_sensor_names_table = '1.3.6.1.2.1.47.1.1.1.1.7'         # from ENTITY-MIB
+        oid_sensors_status_table = '1.3.6.1.4.1.9.9.91.1.1.1.1.5'   # from CISCO-ENTITY-SENSOR-MIB
 
-        oid_sensors_status = '1.3.6.1.4.1.9.9.13.1.3.1.6'
-        oid_fans_status = '1.3.6.1.4.1.9.9.13.1.4.1.3'
-        oid_powers_status = '1.3.6.1.4.1.9.9.13.1.5.1.3'
+        sensor_status_table = plugin.queryNextSnmpOid(oid_sensors_status_table)
 
-        if plugin.params.type == 'sensor':
-            oid_hard_names = oid_sensors_names
-            oid_hard_status = oid_sensors_status
-        elif plugin.params.type == 'fan':
-            oid_hard_names = oid_fans_names
-            oid_hard_status = oid_fans_status
-        elif plugin.params.type == 'power':
-            oid_hard_names = oid_powers_names
-            oid_hard_status = oid_powers_status
-
-        hard_status = plugin.queryNextSnmpOid(oid_hard_status)
-
-        # Checking state of HSRP for all interfaces
         longoutput = ""
         output = ""
         exit_code = 0
-        nbr_error = 0
-        for state in hard_status:
-            stateIndex = state[0][-1]
-            stateDescr = plugin.querySnmpOid('%s.%s' % (oid_hard_names, stateIndex))
+        nbr_sensor_fails = 0
+        for sensor in sensor_status_table:
+            sensor_index = sensor[0][-1]
+            sensor_name = plugin.querySnmpOid('%s.%s' % (oid_sensor_names_table, sensor_index))
 
-            if state[1] > 1:
-                longoutput += '** %s: %s **\n' % (stateDescr[1], plugin.statusname[1])
+            # Sensor are in errors if >1 (ok(1), unavailable(2), nonoperational(3))
+            # Skip sensors marked as unavailable
+            if sensor[1] != 1 and sensor[1] != 2:
+                longoutput += '** %s: Non operational ! **\n' % sensor_name[1]
                 if exit_code != 2: exit_code = 1
-                nbr_error += 1
+                nbr_sensor_fails += 1
             else:
-                longoutput += '%s: %s\n' % (stateDescr[1], plugin.statusname[1])
+                longoutput += '%s: ok\n' % sensor_name[1]
 
         longoutput = longoutput.rstrip('\n')
+        #noinspection PySimplifyBooleanCheck
         if exit_code == 1:
-            output = '%d %s in error !\n' % (nbr_error, plugin.params.type.title())
+            output = '%d sensors are non operationals !\n' % nbr_sensor_fails
             plugin.critical(output + longoutput)
         elif exit_code == 0:
-            output = '%s health is good.\n' % plugin.params.type.title()
+            output = 'Sensor health is good.\n'
             plugin.ok(output + longoutput)
     except Exception as e:
         print "Arrrgh... exception occured ! Please contact DL-ITOP-MONITORING."
