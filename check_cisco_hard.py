@@ -43,27 +43,70 @@ if __name__ == '__main__':
 
         plugin = CheckCiscoHard(progname, progversion, progdesc)
 
+        # OIDs for devices supporting CISCO-ENTITY-SENSOR-MIB
         oid_sensor_names_table = '1.3.6.1.2.1.47.1.1.1.1.7'         # from ENTITY-MIB
         oid_sensors_status_table = '1.3.6.1.4.1.9.9.91.1.1.1.1.5'   # from CISCO-ENTITY-SENSOR-MIB
 
-        sensor_status_table = plugin.queryNextSnmpOid(oid_sensors_status_table)
+        # OIDs for devices supporting CISCO-ENVMON-MIB
+        oid_envmon_fan_status_table = '1.3.6.1.4.1.9.9.13.1.4.1'      # from CISCO-ENVMON-MIB
+        oid_envmon_power_status_table = '1.3.6.1.4.1.9.9.13.1.5.1'    # from CISCO-ENVMON-MIB
 
+        oid_envmon_fan_status = '%s.3' % oid_envmon_fan_status_table
+        oid_envmon_power_status = '%s.3' % oid_envmon_power_status_table
+
+        # Store all sensors data
+        sensor_data = []
+        
+        # Query using CISCO-ENTITY-SENSOR-MIB be default, fallback to CISCO-ENVMON-MIB
+        sensor_status_list = plugin.queryNextSnmpOid(oid_sensors_status_table)
+        if not sensor_status_list:
+            # Does not support CISCO-ENTITY-SENSOR-MIB
+            plugin.debug('Device not supporting CISCO-ENTITY-SENSOR-MIB, fallback.')
+            sensor_status_list = plugin.queryNextSnmpOid(oid_envmon_fan_status)
+            sensor_status_list.extend(plugin.queryNextSnmpOid(oid_envmon_power_status))
+
+            for sensor in sensor_status_list:
+                sensor_index = sensor[0][-1]
+                sensor_name = plugin.querySnmpOid('%s.2.%s' % (plugin.tupleOidToDotted(sensor[0][0:12]), sensor_index))[1]
+                sensor_status = sensor[1]
+
+                # Skip sensor status marked as unavailable(2)
+                if sensor_status == 5:
+                    continue
+
+                sensor_data.append((sensor_name, sensor_status))
+        else:
+            # Support CISCO-ENTITY-SENSOR-MIB
+            plugin.debug('Device supporting CISCO-ENTITY-SENSOR-MIB, continue.')
+            for sensor in sensor_status_list:
+                sensor_index = sensor[0][-1]
+                sensor_name = plugin.querySnmpOid('%s.%s' % (oid_sensor_names_table, sensor_index))[1]
+                sensor_status = sensor[1]
+
+                # Skip sensor status marked as unavailable(2)
+                if sensor_status == 2:
+                    continue
+                
+                sensor_data.append((sensor_name, sensor_status))
+
+        plugin.debug('Sensor data:')
+        plugin.debug('\t%s' % sensor_data)
+
+        # Check thresholds and format output to Nagios
         longoutput = ""
         output = ""
         exit_code = 0
         nbr_sensor_fails = 0
-        for sensor in sensor_status_table:
-            sensor_index = sensor[0][-1]
-            sensor_name = plugin.querySnmpOid('%s.%s' % (oid_sensor_names_table, sensor_index))
+        for sensor in sensor_data:
+            sensor_name, sensor_status = sensor
 
-            # Sensor are in errors if >1 (ok(1), unavailable(2), nonoperational(3))
-            # Skip sensors marked as unavailable
-            if sensor[1] != 1 and sensor[1] != 2:
-                longoutput += '** %s: Non operational ! **\n' % sensor_name[1]
+            # Sensor are in errors if >1
+            if sensor_status > 1:
+                longoutput += '** %s: Non operational ! **\n' % sensor_name
                 if exit_code != 2: exit_code = 1
                 nbr_sensor_fails += 1
             else:
-                longoutput += '%s: ok\n' % sensor_name[1]
+                longoutput += '%s: ok\n' % sensor_name
 
         longoutput = longoutput.rstrip('\n')
         #noinspection PySimplifyBooleanCheck
