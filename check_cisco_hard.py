@@ -92,6 +92,10 @@ if __name__ == '__main__':
         plugin.debug('Sensor data:')
         plugin.debug('\t%s' % sensor_data)
 
+        # Return OK if no hardware sensor support is available
+        if not len(sensor_data):
+            plugin.ok('No support for hardware sensor available.')
+
         # Check thresholds and format output to Nagios
         longoutput = ""
         output = ""
