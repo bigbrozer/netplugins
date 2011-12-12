@@ -35,7 +35,7 @@ class CheckCiscoTEMP(NagiosPluginSNMP):
         super(CheckCiscoTEMP, self).__init__(name, version, description)
 
     def setPluginArguments(self):
-        """Define arguments for the plugin"""""
+        """Define arguments for the plugin"""
         # Define common arguments
         super(CheckCiscoTEMP, self).setPluginArguments()
 
@@ -46,7 +46,7 @@ class CheckCiscoTEMP(NagiosPluginSNMP):
                                   help='Critical threshold in percent (eg. 90)')
 
     def checkPluginArguments(self):
-        """Check syntax of all arguments"""""
+        """Check syntax of all arguments"""
         # Check common arguments syntax
         super(CheckCiscoTEMP, self).checkPluginArguments()
 
@@ -63,35 +63,59 @@ if __name__ == '__main__':
 
         plugin = CheckCiscoTEMP(progname, progversion, progdesc)
 
-        oid_temp_names = '1.3.6.1.4.1.9.9.13.1.3.1.2'
-        oid_temp_values = '1.3.6.1.4.1.9.9.13.1.3.1.3'
+        # OIDs
+        oid_sensor_types = '1.3.6.1.4.1.9.9.91.1.1.1.1.1'   # From CISCO-ENTITY-SENSOR-MIB
+        oid_sensor_values = '1.3.6.1.4.1.9.9.91.1.1.1.1.4'  # From CISCO-ENTITY-SENSOR-MIB
+        oid_entity_names = '1.3.6.1.2.1.47.1.1.1.1.7'       # From ENTITY-MIB
 
-        temp_values = plugin.queryNextSnmpOid(oid_temp_values)
+        # Store temp data
+        temp_data = []
+        
+        # Get all "celsius" sensor types
+        sensor_types = plugin.queryNextSnmpOid(oid_sensor_types)
+        if sensor_types:
+            for type in sensor_types:
+                plugin.debug('Sensor type is: %s' % type[1])
 
-        # Checking state of HSRP for all interfaces
+                # If sensor type is celsius(8)
+                if type[1] == 8:
+                    sensor_index = type[0][-1]
+                    sensor_name = plugin.querySnmpOid('%s.%s' % (oid_entity_names, sensor_index))
+                    sensor_value = plugin.querySnmpOid('%s.%s' % (oid_sensor_values, sensor_index))
+                    temp_data.append((sensor_name[1], sensor_value[1]))
+                else:
+                    plugin.debug('Skipping sensor type: %s' % type[1])
+        else:
+            plugin.unknown('SNMP Query Error: query all sensor types returned no result !')
+
+        plugin.debug('Temp data: %s' % temp_data)
+        
+        # Check thresholds and format output to Nagios
         longoutput = ""
         output = ""
         perfdata = "| "
         exit_code = 0
         nbr_error = 0
-        for temp in temp_values:
-            tempIndex = temp[0][-1]
-            tempDescr = plugin.querySnmpOid('%s.%s' % (oid_temp_names, tempIndex))
-
-            if plugin.params.warnthr < temp[1] < plugin.params.critthr:
-                longoutput += '* %s: %d C (>%d) *\n' % (tempDescr[1], temp[1], plugin.params.warnthr)
+        for temp in temp_data:
+            temp_descr, temp_value = temp
+            
+            if plugin.params.warnthr < temp_value < plugin.params.critthr:
+                longoutput += '* %s: %d C (>%d) *\n' % (temp_descr, temp_value, plugin.params.warnthr)
                 if exit_code != 2: exit_code = 1
                 nbr_error += 1
-            elif temp[1] > plugin.params.critthr:
-                longoutput += '** %s: %d C (>%d) **\n' % (tempDescr[1], temp[1], plugin.params.critthr)
+            elif temp_value > plugin.params.critthr:
+                longoutput += '** %s: %d C (>%d) **\n' % (temp_descr, temp_value, plugin.params.critthr)
                 exit_code = 2
                 nbr_error += 1
-            elif temp[1] < plugin.params.warnthr:
-                longoutput += '%s: %d C (<%d)\n' % (tempDescr[1], temp[1], plugin.params.warnthr)
+            elif temp_value < plugin.params.warnthr:
+                longoutput += '%s: %d C (<%d)\n' % (temp_descr, temp_value, plugin.params.warnthr)
 
             perfdata += '%s=%dC;%d;%d;; ' % (
-            str(tempDescr[1]).replace(' ', '_').replace('_temperature', ''), temp[1], plugin.params.warnthr,
-            plugin.params.critthr)
+                str(temp_descr).replace(' ', '_').replace(',', '_').replace('_temperature', ''),
+                temp_value,
+                plugin.params.warnthr,
+                plugin.params.critthr
+            )
 
         # Add perfdata
         longoutput += perfdata
