@@ -92,23 +92,32 @@ if __name__ == '__main__':
         
         # Check thresholds and format output to Nagios
         longoutput = ""
+        longoutput_crit = ""
+        longoutput_warn = ""
+        longoutput_ok = ""
         output = ""
         perfdata = "| "
         exit_code = 0
         nbr_error = 0
+        nbr_crit = 0
+        nbr_warn = 0
+        nbr_ok = 0
         for temp in temp_data:
             temp_descr, temp_value = temp
             
             if plugin.params.warnthr < temp_value < plugin.params.critthr:
-                longoutput += '* %s: %d C (>%d) *\n' % (temp_descr, temp_value, plugin.params.warnthr)
+                longoutput_warn += ' * %s: %d C (>%d) *\n' % (temp_descr, temp_value, plugin.params.warnthr)
                 if exit_code != 2: exit_code = 1
                 nbr_error += 1
+                nbr_warn += 1
             elif temp_value > plugin.params.critthr:
-                longoutput += '** %s: %d C (>%d) **\n' % (temp_descr, temp_value, plugin.params.critthr)
+                longoutput_crit += ' ** %s: %d C (>%d) **\n' % (temp_descr, temp_value, plugin.params.critthr)
                 exit_code = 2
                 nbr_error += 1
+                nbr_crit += 1
             elif temp_value < plugin.params.warnthr:
-                longoutput += '%s: %d C (<%d)\n' % (temp_descr, temp_value, plugin.params.warnthr)
+                longoutput_ok += ' %s: %d C (<%d)\n' % (temp_descr, temp_value, plugin.params.warnthr)
+                nbr_ok += 1
 
             perfdata += '%s=%dC;%d;%d;; ' % (
                 str(temp_descr).replace(' ', '_').replace(',', '_').replace('_temperature', ''),
@@ -117,13 +126,24 @@ if __name__ == '__main__':
                 plugin.params.critthr
             )
 
+        # Format output
+        if nbr_crit > 0:
+            longoutput += 'Critical: (%d)\n%s\n' % (nbr_crit, longoutput_crit)
+        if nbr_warn > 0:
+            longoutput += 'Warning: (%d)\n%s\n' % (nbr_warn, longoutput_warn)
+        if nbr_ok > 0:
+            longoutput += 'OK: (%d)\n%s\n' % (nbr_ok, longoutput_ok)
+
         # Add perfdata
         longoutput += perfdata
 
         # Output to Nagios
         longoutput = longoutput.rstrip('\n')
         #noinspection PySimplifyBooleanCheck
-        if exit_code == 1:
+        if exit_code == 2:
+            output = '%d temperature sensor above thresholds !\n' % nbr_error
+            plugin.critical(output + longoutput)
+        elif exit_code == 1:
             output = '%d temperature sensor above thresholds !\n' % nbr_error
             plugin.warning(output + longoutput)
         elif exit_code == 0:
