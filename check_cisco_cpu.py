@@ -57,7 +57,7 @@ if __name__ == '__main__':
     try:
         progname = os.path.basename(sys.argv[0])
         progdesc = 'Check all CPUs usage on Cisco devices supporting CISCO-PROCESS-MIB.'
-        progversion = '1.0'
+        progversion = '1.1'
 
         plugin = CheckCiscoCPU(progname, progversion, progdesc)
 
@@ -65,6 +65,7 @@ if __name__ == '__main__':
         oid_cpu_indexes = '1.3.6.1.4.1.9.9.109.1.1.1.1.2'
         oid_cpu_usages = '1.3.6.1.4.1.9.9.109.1.1.1.1.8'
 
+        plugin.debug('====== Getting indexes...')
         cpu_indexes = plugin.queryNextSnmpOid(oid_cpu_indexes)
         cpu_usages = plugin.queryNextSnmpOid(oid_cpu_usages)
 
@@ -72,14 +73,21 @@ if __name__ == '__main__':
             plugin.unknown('SNMP query error: query returned no result !')
             
         cpu_data = {}
+        plugin.debug('====== Getting name for CPU module...')
         for i in range(0, len(cpu_usages)):
+            cpu_index = cpu_indexes[i][1]
             try:
-                cpu_name = str(plugin.querySnmpOid('%s.%s' % (oid_entity_name, cpu_indexes[i][1]))[1])
+                if cpu_index:
+                    plugin.debug('\tCPU index found.')
+                    cpu_name = str(plugin.querySnmpOid('%s.%s' % (oid_entity_name, cpu_index))[1])
+                else:
+                    plugin.debug('\tCPU index cannot be determined. Generating name...')
+                    raise IndexError()
             except IndexError:
                 # Set a default name for the CPU module
                 cpu_name = 'CPU%d' % i
 
-            plugin.debug('CPU name: %s' % cpu_name)
+            plugin.debug('\tCPU name: %s' % cpu_name)
             cpu_data[cpu_name] = int(cpu_usages[i][1])
 
         # Checking values if in thresholds and formatting output
@@ -107,8 +115,8 @@ if __name__ == '__main__':
 
         # Output to Nagios
         longoutput = longoutput.rstrip('\n')
-        #noinspection PySimplifyBooleanCheck
-        if exit_code == 0:
+
+        if not exit_code:
             output = 'All CPU usage are below thresholds.\n'
             longoutput += perfdata
             plugin.ok(output + longoutput)
