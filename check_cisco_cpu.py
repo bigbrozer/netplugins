@@ -75,8 +75,8 @@ if __name__ == '__main__':
         cpu_data = {}
         plugin.debug('====== Getting name for CPU module...')
         for i in range(0, len(cpu_usages)):
-            cpu_index = cpu_indexes[i][1]
             try:
+                cpu_index = cpu_indexes[i][1]
                 if cpu_index:
                     plugin.debug('\tCPU index found.')
                     cpu_name = str(plugin.querySnmpOid('%s.%s' % (oid_entity_name, cpu_index))[1])
