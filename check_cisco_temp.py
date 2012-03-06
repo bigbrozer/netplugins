@@ -139,14 +139,13 @@ if __name__ == '__main__':
 
         # Output to Nagios
         longoutput = longoutput.rstrip('\n')
-        #noinspection PySimplifyBooleanCheck
         if exit_code == 2:
             output = '%d temperature sensor above thresholds !\n' % nbr_error
             plugin.critical(output + longoutput)
         elif exit_code == 1:
             output = '%d temperature sensor above thresholds !\n' % nbr_error
             plugin.warning(output + longoutput)
-        elif exit_code == 0:
+        elif not exit_code:
             output = 'All temperature sensor are below thresholds.\n'
             plugin.ok(output + longoutput)
     except Exception as e:
