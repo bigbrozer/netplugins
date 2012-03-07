@@ -1,22 +1,23 @@
 #!/usr/bin/env python2.7
 # -*- coding: UTF-8 -*-
-#
 #===============================================================================
 # Name          : check_cisco_hsrp.py
-# Author        : Vincent BESANCON aka 'v!nZ' <elguapito@free.fr>
-# License       : Creative Commons Attribution-Noncommercial-Share Alike 2.0 France
+# Author        : Vincent BESANCON <besancon.vincent@gmail.com>
 # Description   : Check HSRP on Cisco devices. Check if the router must be the
 #                 active or standby router for VLANs.
 #-------------------------------------------------------------------------------
-# This work is licensed under the 
-# Creative Commons Attribution-Noncommercial-Share Alike 2.0 France License.
-# To view a copy of this license, visit
-# http://creativecommons.org/licenses/by-nc-sa/2.0/fr/ or send a letter to
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
 #
-# Creative Commons
-# 171 Second Street, Suite 300
-# San Francisco, California
-# 94105, USA.
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #===============================================================================
 
 import os, sys, traceback
@@ -37,7 +38,7 @@ class CheckCiscoHSRP(NagiosPluginSNMP):
         self.rolename = {1: 'initial', 2: 'learn', 3: 'listen', 4: 'speak', 5: 'standby', 6: 'active'}
 
     def setPluginArguments(self):
-        '''Define arguments for the plugin'''
+        """Define arguments for the plugin"""
         # Define common arguments
         super(CheckCiscoHSRP, self).setPluginArguments()
 
@@ -46,7 +47,7 @@ class CheckCiscoHSRP(NagiosPluginSNMP):
                                   choices=['active', 'standby'], help='Role of this router')
 
     def checkPluginArguments(self):
-        '''Check syntax of all arguments'''
+        """Check syntax of all arguments"""
         # Check common arguments syntax
         super(CheckCiscoHSRP, self).checkPluginArguments()
 
@@ -89,7 +90,7 @@ if __name__ == '__main__':
         if exit_code == 1:
             output = '%d HRSP interface error !\n' % nbr_error
             plugin.warning(output + longoutput)
-        elif exit_code == 0:
+        elif not exit_code:
             output = 'Role for HSRP is %s.\n' % plugin.params.role
             plugin.ok(output + longoutput)
     except Exception as e:

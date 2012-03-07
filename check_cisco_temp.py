@@ -1,21 +1,22 @@
 #!/usr/bin/env python2.7
 # -*- coding: UTF-8 -*-
-#
 #===============================================================================
 # Name          : check_cisco_temp.py
-# Author        : Vincent BESANCON aka 'v!nZ' <elguapito@free.fr>
-# License       : Creative Commons Attribution-Noncommercial-Share Alike 2.0 France
+# Author        : Vincent BESANCON <besancon.vincent@gmail.com>
 # Description   : Check all temperature on Cisco devices and alert if one is above thresholds.
 #-------------------------------------------------------------------------------
-# This work is licensed under the 
-# Creative Commons Attribution-Noncommercial-Share Alike 2.0 France License.
-# To view a copy of this license, visit
-# http://creativecommons.org/licenses/by-nc-sa/2.0/fr/ or send a letter to
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
 #
-# Creative Commons
-# 171 Second Street, Suite 300
-# San Francisco, California
-# 94105, USA.
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #===============================================================================
 #
 #

@@ -1,22 +1,23 @@
 #!/usr/bin/env python2.7
 # -*- coding: UTF-8 -*-
-#
 #===============================================================================
 # Name          : check_extreme_vrrp.py
-# Authors       : Vincent BESANCON aka 'v!nZ' <elguapito@free.fr>
+# Authors       : Vincent BESANCON <besancon.vincent@gmail.com>
 #                 Julien DORMOY aka Fusionwork <dormoyjuju@free.fr>
-# License       : Creative Commons Attribution-Noncommercial-Share Alike 2.0 France
 # Description   : Check VRRP status of VLAN on Extreme Core devices.
 #-------------------------------------------------------------------------------
-# This work is licensed under the 
-# Creative Commons Attribution-Noncommercial-Share Alike 2.0 France License.
-# To view a copy of this license, visit
-# http://creativecommons.org/licenses/by-nc-sa/2.0/fr/ or send a letter to
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
 #
-# Creative Commons
-# 171 Second Street, Suite 300
-# San Francisco, California
-# 94105, USA.
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #===============================================================================
 #
 import os, sys, traceback
@@ -36,7 +37,7 @@ class CheckExtremeVRRP(NagiosPluginSNMP):
         self.vrrp_status = {1: 'initialize', 2: 'backup', 3: 'master'}
 
     def setPluginArguments(self):
-        '''Define arguments for the plugin'''
+        """Define arguments for the plugin"""
         # Define common arguments
         super(CheckExtremeVRRP, self).setPluginArguments()
 
@@ -45,7 +46,7 @@ class CheckExtremeVRRP(NagiosPluginSNMP):
                                   help='Warning threshold, sum of all vrrp status.')
 
     def checkPluginArguments(self):
-        '''Check syntax of all arguments'''
+        """Check syntax of all arguments"""
         # Check common arguments syntax
         super(CheckExtremeVRRP, self).checkPluginArguments()
 

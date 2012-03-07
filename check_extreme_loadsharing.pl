@@ -2,9 +2,20 @@
 #===============================================================================
 # Name          : check_cisco_cpu_module.pl
 # Author        : Thibaut COURVOISIER <thibaut.courvoisier-ext@faurecia.com>
-# License       : Creative Commons Attribution-Noncommercial-Share Alike 2.0 France
 # Description   : Check which CPU module is active on Cisco Core Switch.
 #-------------------------------------------------------------------------------
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #===============================================================================
 
 use strict;
@@ -93,12 +104,12 @@ sub get_load_sharing {
 	my $oid_table = $session->get_table(
 	Baseoid => $loadsharing_table );
 
-foreach my $oid (keys (%$oid_table))  # Recupére les clés du hash contenu dans la variable $oid_table et les stock dans $oid.
+foreach my $oid (keys (%$oid_table))  # Recupï¿½re les clï¿½s du hash contenu dans la variable $oid_table et les stock dans $oid.
 {
 	
 	# ** Alias **
-	my @oid_elements = split(/\./, $oid); # découpage en element nos clés
-	my $alias = $oid_elements[-2].".".$oid_elements[-1];        # recuppération de l'alias en prennant que les deux derniers element des clés, particularité du loadsharing.
+	my @oid_elements = split(/\./, $oid); # dï¿½coupage en element nos clï¿½s
+	my $alias = $oid_elements[-2].".".$oid_elements[-1];        # recuppï¿½ration de l'alias en prennant que les deux derniers element des clï¿½s, particularitï¿½ du loadsharing.
 	
 	$loadsharing_oid = $loadsharing_table.".".$alias;
 	$loadsharing = $session->get_request($loadsharing_oid);	
