@@ -25,6 +25,8 @@ import os, sys
 
 from monitoring.nagios.plugin.snmp import NagiosPluginSNMP
 
+logger = log.getLogger('plugin')
+
 # Specific class for this plugin
 class CheckCiscoCPU(NagiosPluginSNMP):
     def define_plugin_arguments(self):
@@ -48,7 +50,7 @@ if __name__ == '__main__':
     oid_cpu_indexes = '1.3.6.1.4.1.9.9.109.1.1.1.1.2'
     oid_cpu_usages = '1.3.6.1.4.1.9.9.109.1.1.1.1.8'
 
-    log.debug('====== Getting indexes...')
+    logger.debug('====== Getting indexes...')
     cpu_indexes = plugin.snmpnext(oid_cpu_indexes)
     cpu_usages = plugin.snmpnext(oid_cpu_usages)
 
@@ -56,21 +58,21 @@ if __name__ == '__main__':
         plugin.unknown('SNMP query error: query returned no result !')
 
     cpu_data = {}
-    log.debug('====== Getting name for CPU module...')
+    logger.debug('====== Getting name for CPU module...')
     for i in range(0, len(cpu_usages)):
         try:
             cpu_index = cpu_indexes[i][1]
             if cpu_index:
-                log.debug('\tCPU index found.')
+                logger.debug('\tCPU index found.')
                 cpu_name = str(plugin.snmpget('%s.%s' % (oid_entity_name, cpu_index))[1])
             else:
-                log.debug('\tCPU index cannot be determined. Generating name...')
+                logger.debug('\tCPU index cannot be determined. Generating name...')
                 raise IndexError()
         except IndexError:
             # Set a default name for the CPU module
             cpu_name = 'CPU%d' % i
 
-        log.debug('\tCPU name: %s' % cpu_name)
+        logger.debug('\tCPU name: %s' % cpu_name)
         cpu_data[cpu_name] = int(cpu_usages[i][1])
 
     # Checking values if in thresholds and formatting output
