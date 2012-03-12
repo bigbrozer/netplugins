@@ -20,85 +20,62 @@
 #===============================================================================
 #
 #
-import os, sys, traceback
+import os, sys
 
-try:
-    from nagios.plugin.snmp import NagiosPluginSNMP
-except Exception as e:
-    print "Arrrgh... exception occured ! Please contact DL-ITOP-MONITORING."
-    exc_type, exc_value, exc_traceback = sys.exc_info()
-    traceback.print_exception(exc_type, exc_value, exc_traceback, limit=2, file=sys.stdout)
-    raise SystemExit(3)
+from monitoring.nagios.plugin.snmp import NagiosPluginSNMP
 
 # Specific class for this plugin
-class CheckExtremeAlim(NagiosPluginSNMP):
+class CheckExtremeHard(NagiosPluginSNMP):
     def __init__(self, name, version, description):
-        super(CheckExtremeAlim, self).__init__(name, version, description)
+        super(CheckExtremeHard, self).__init__(name, version, description)
         # 1normal,2warning,3critical,4shutdown,5notPresent,6notFunctioning
         self.statusname = {1: 'Not present', 2: 'Normal', 3: 'Error'}
 
-    def setPluginArguments(self):
+    def define_plugin_arguments(self):
         """Define arguments for the plugin"""
         # Define common arguments
-        super(CheckExtremeAlim, self).setPluginArguments()
+        super(CheckExtremeHard, self).define_plugin_arguments()
 
         # Add extra arguments
-        self.argparser.add_option('-T', '--type', action='store', type="choice", choices=['power'], dest='type',
-                                  help='Type of hardware to check (choices: power)')
-
-    def checkPluginArguments(self):
-        """Check syntax of all arguments"""
-        # Check common arguments syntax
-        super(CheckExtremeAlim, self).checkPluginArguments()
-
-        # Check extra arguments syntax
-        if not self.params.type:
-            self.unknown('Missing type of hardware to check for ! (options -T or --type)')
+        self.required_args.add_argument('-T', '--type', choices=['power'], dest='type',
+                                  help='Type of hardware to check.', required=True)
 
 # The main procedure
 if __name__ == '__main__':
-    try:
-        progname = os.path.basename(sys.argv[0])
-        progdesc = 'Check hardware (power only) of Extreme devices.'
-        progversion = '1.0'
+    progname = os.path.basename(sys.argv[0])
+    progdesc = 'Check hardware (power only) of Extreme devices.'
+    progversion = '1.0'
 
-        plugin = CheckExtremeAlim(progname, progversion, progdesc)
+    plugin = CheckExtremeHard(progname, progversion, progdesc)
 
-        oid_powers_status = '1.3.6.1.4.1.1916.1.1.1.27.1.2'
+    oid_powers_status = '1.3.6.1.4.1.1916.1.1.1.27.1.2'
+    oid_hard_status = oid_powers_status
 
-        if plugin.params.type == 'power':
-            oid_hard_status = oid_powers_status
+    hard_status = plugin.snmpnext(oid_hard_status)
 
-        hard_status = plugin.queryNextSnmpOid(oid_hard_status)
+    # Checking state of hardware
+    longoutput = ""
+    output = ""
+    exit_code = 0
+    nbr_error = 0
+    i = 0
+    for power in hard_status:
+        state_code = power[1]
+        power_name = 'Power%d' % i
 
-        # Checking state of hardware
-        longoutput = ""
-        output = ""
-        exit_code = 0
-        nbr_error = 0
-        i = 0
-        for power in hard_status:
-            state_code = power[1]
-            power_name = 'Power%d' % i
+        if state_code != 2:
+            longoutput += '** %s: %s **\n' % (power_name, plugin.statusname[state_code])
+            nbr_error += 1
+            exit_code = 1
+        else:
+            longoutput += '%s: %s\n' % (power_name, plugin.statusname[state_code])
+        i += 1
 
-            if state_code != 2:
-                longoutput += '** %s: %s **\n' % (power_name, plugin.statusname[state_code])
-                nbr_error += 1
-                exit_code = 1
-            else:
-                longoutput += '%s: %s\n' % (power_name, plugin.statusname[state_code])
-            i += 1
-
-        # Formatting output
-        longoutput = longoutput.rstrip('\n')
-        if exit_code == 1:
-            output = '%d %s health in error !\n' % (nbr_error, plugin.params.type.title())
-            plugin.critical(output + longoutput)
-        elif not exit_code:
-            output = '%s health is good.\n' % plugin.params.type.title()
-            plugin.ok(output + longoutput)
-    except Exception as e:
-        print "Arrrgh... exception occured ! Please contact DL-ITOP-MONITORING."
-        exc_type, exc_value, exc_traceback = sys.exc_info()
-        traceback.print_exception(exc_type, exc_value, exc_traceback, limit=2, file=sys.stdout)
-        raise SystemExit(3)
+    # Formatting output
+    longoutput = longoutput.rstrip('\n')
+    if exit_code == 1:
+        output = '%d %s health in error !\n' % (nbr_error, plugin.options.type.title())
+        plugin.critical(output + longoutput)
+    elif not exit_code:
+        output = '%s health is good.\n' % plugin.options.type.title()
+        plugin.ok(output + longoutput)
