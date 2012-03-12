@@ -12,4 +12,4 @@ Download
 Usage
 -----
 
-
+Check plugin help with -h/--help.
