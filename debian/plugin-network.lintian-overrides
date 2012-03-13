@@ -1,0 +1,2 @@
+plugin-network: dir-or-file-in-opt
+plugin-network: python-script-but-no-python-dep
