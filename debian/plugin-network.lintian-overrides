@@ -1,3 +1,2 @@
-plugin-network: dir-or-file-in-opt
-plugin-network: dir-or-file-in-opt opt/faurecia/
+# No Python 2.7 on Lenny, use this until we migrate to next Ubuntu LTS
 plugin-network: python-script-but-no-python-dep
