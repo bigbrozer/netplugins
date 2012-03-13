@@ -21,6 +21,7 @@
 #
 #
 import logging as log
+import re
 import os, sys
 
 from monitoring.nagios.plugin.snmp import NagiosPluginSNMP
@@ -35,16 +36,44 @@ class CheckCiscoTEMP(NagiosPluginSNMP):
         super(CheckCiscoTEMP, self).define_plugin_arguments()
 
         # Add extra arguments
-        self.required_args.add_argument('-w', type=int, dest='warnthr',
-                                  help='Warning threshold in percent (eg. 80)', required=True)
-        self.required_args.add_argument('-c', type=int, dest='critthr',
-                                  help='Critical threshold in percent (eg. 90)', required=True)
+        self.required_args.add_argument('-w', nargs=3, metavar=('5k_outlet', 'fex_outlet', 'fex_die'), type=int, dest='warnthr',
+                                  help='Warning threshold in percent for 5K Outlet, Fex Outlet and Fex Die.', required=True)
+        self.required_args.add_argument('-c', nargs=3, metavar=('5k_outlet', 'fex_outlet', 'fex_die'), type=int, dest='critthr',
+                                  help='Critical threshold in percent for 5K Outlet, Fex Outlet and Fex Die.', required=True)
+
+# Function that verify thresholds
+def check_thresholds(sensor, value, warn, crit):
+    global count, perfdata, longoutput_warn, longoutput_crit, longoutput_ok
+    global exit_code
+    global nbr_error, nbr_warn, nbr_crit, nbr_ok
+
+    if warn < value < crit:
+        longoutput_warn += ' * %s: %d C (>%d <%d) *\n' % (sensor, value, warn, crit)
+        if exit_code != 2: exit_code = 1
+        nbr_error += 1
+        nbr_warn += 1
+    elif value > crit:
+        longoutput_crit += ' ** %s: %d C (>%d) **\n' % (sensor, value, crit)
+        exit_code = 2
+        nbr_error += 1
+        nbr_crit += 1
+    elif value < warn:
+        longoutput_ok += ' %s: %d C (<%d)\n' % (sensor, value, warn)
+        nbr_ok += 1
+
+    perfdata += '%d_%s=%dC;%d;%d;; ' % (
+        count,
+        sensor.replace(' ', '_').replace(',', '_').replace('_temperature', ''),
+        value,
+        warn,
+        crit
+    )
 
 # The main procedure
 if __name__ == '__main__':
     progname = os.path.basename(sys.argv[0])
     progdesc = 'Check all temperature on Cisco devices and alert if one is above thresholds.'
-    progversion = '1.0'
+    progversion = '1.1'
 
     plugin = CheckCiscoTEMP(progname, progversion, progdesc)
 
@@ -67,7 +96,7 @@ if __name__ == '__main__':
                 sensor_index = type[0][-1]
                 sensor_name = plugin.snmpget('%s.%s' % (oid_entity_names, sensor_index))
                 sensor_value = plugin.snmpget('%s.%s' % (oid_sensor_values, sensor_index))
-                temp_data.append((sensor_name[1], sensor_value[1]))
+                temp_data.append((str(sensor_name[1]), int(sensor_value[1])))
             else:
                 logger.debug('Skipping sensor type: %s' % type[1])
     else:
@@ -87,29 +116,24 @@ if __name__ == '__main__':
     nbr_crit = 0
     nbr_warn = 0
     nbr_ok = 0
+    count = 0
+
+    # Expand tuple of thresholds
+    outlet_warn, fexout_warn, fexdie_warn = plugin.options.warnthr
+    outlet_crit, fexout_crit, fexdie_crit = plugin.options.critthr
+
     for temp in temp_data:
+        count += 1
         temp_descr, temp_value = temp
 
-        if plugin.options.warnthr < temp_value < plugin.options.critthr:
-            longoutput_warn += ' * %s: %d C (>%d) *\n' % (temp_descr, temp_value, plugin.options.warnthr)
-            if exit_code != 2: exit_code = 1
-            nbr_error += 1
-            nbr_warn += 1
-        elif temp_value > plugin.options.critthr:
-            longoutput_crit += ' ** %s: %d C (>%d) **\n' % (temp_descr, temp_value, plugin.options.critthr)
-            exit_code = 2
-            nbr_error += 1
-            nbr_crit += 1
-        elif temp_value < plugin.options.warnthr:
-            longoutput_ok += ' %s: %d C (<%d)\n' % (temp_descr, temp_value, plugin.options.warnthr)
-            nbr_ok += 1
-
-        perfdata += '%s=%dC;%d;%d;; ' % (
-            str(temp_descr).replace(' ', '_').replace(',', '_').replace('_temperature', ''),
-            temp_value,
-            plugin.options.warnthr,
-            plugin.options.critthr
-        )
+        # Check 5K Outlet thresholds
+        logger.debug('Processing sensor %s.' % temp_descr)
+        if re.search(r'^Module.*Outlet', temp_descr):
+            check_thresholds(temp_descr, temp_value, outlet_warn, outlet_crit)
+        elif re.search(r'^Fex.*Outlet', temp_descr):
+            check_thresholds(temp_descr, temp_value, fexout_warn, fexout_crit)
+        elif re.search(r'^Fex.*Die', temp_descr):
+            check_thresholds(temp_descr, temp_value, fexdie_warn, fexdie_crit)
 
     # Format output
     if nbr_crit > 0:
