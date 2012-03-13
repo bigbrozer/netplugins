@@ -2,7 +2,7 @@ Source: plugin-network
 Section: net
 Priority: extra
 Maintainer: Vincent BESANCON <vincent.besancon@faurecia.com>
-Build-Depends: debhelper (>= 8.0.0)
+Build-Depends: debhelper (>= 8.0.0), git-buildpackage (>= 0.5.30)
 Standards-Version: 3.9.2
 Vcs-Git: http://monitoring-dc.app.corp/git/network.git
 Vcs-Browser: http://monitoring-dc.app.corp/git/?p=network.git
