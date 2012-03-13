@@ -24,6 +24,7 @@ import logging as log
 import re
 import os, sys
 
+import shared
 from monitoring.nagios.plugin.snmp import NagiosPluginSNMP
 
 logger = log.getLogger('plugin')
@@ -73,9 +74,8 @@ def check_thresholds(sensor, value, warn, crit):
 if __name__ == '__main__':
     progname = os.path.basename(sys.argv[0])
     progdesc = 'Check all temperature on Cisco devices and alert if one is above thresholds.'
-    progversion = '1.1'
 
-    plugin = CheckCiscoTEMP(progname, progversion, progdesc)
+    plugin = CheckCiscoTEMP(progname, shared.__version__, progdesc)
 
     # OIDs
     oid_sensor_types = '1.3.6.1.4.1.9.9.91.1.1.1.1.1'   # From CISCO-ENTITY-SENSOR-MIB

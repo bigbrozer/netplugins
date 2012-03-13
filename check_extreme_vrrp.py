@@ -22,6 +22,7 @@
 #
 import os, sys, traceback
 
+import shared
 from monitoring.nagios.plugin.snmp import NagiosPluginSNMP
 
 # Specific class for this plugin
@@ -43,9 +44,8 @@ class CheckExtremeVRRP(NagiosPluginSNMP):
 if __name__ == '__main__':
     progname = os.path.basename(sys.argv[0])
     progdesc = 'Check VRRP status of VLAN on Extreme Core devices.'
-    progversion = '1.0'
 
-    plugin = CheckExtremeVRRP(progname, progversion, progdesc)
+    plugin = CheckExtremeVRRP(progname, shared.__version__, progdesc)
 
     oid_vlan_names = '1.3.6.1.4.1.1916.1.2.8.1.1.1'         # Append vlan_id
     oid_vlan_interfaces = '1.3.6.1.4.1.1916.1.2.4.1.1.1'    # Provide vlan_id and vlan_interface

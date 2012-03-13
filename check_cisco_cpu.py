@@ -23,6 +23,7 @@
 import logging as log
 import os, sys
 
+import shared
 from monitoring.nagios.plugin.snmp import NagiosPluginSNMP
 
 logger = log.getLogger('plugin')
@@ -42,9 +43,8 @@ class CheckCiscoCPU(NagiosPluginSNMP):
 if __name__ == '__main__':
     progname = os.path.basename(sys.argv[0])
     progdesc = 'Check all CPUs usage on Cisco devices supporting CISCO-PROCESS-MIB.'
-    progversion = '1.1'
 
-    plugin = CheckCiscoCPU(progname, progversion, progdesc)
+    plugin = CheckCiscoCPU(progname, shared.__version__, progdesc)
 
     oid_entity_name = '1.3.6.1.2.1.47.1.1.1.1.7'
     oid_cpu_indexes = '1.3.6.1.4.1.9.9.109.1.1.1.1.2'

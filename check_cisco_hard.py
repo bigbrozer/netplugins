@@ -23,6 +23,7 @@
 import logging as log
 import os, sys
 
+import shared
 from monitoring.nagios.plugin.snmp import NagiosPluginSNMP
 from monitoring.utils.snmp import convert_tuple_to_oid
 
@@ -32,9 +33,8 @@ logger = log.getLogger('plugin')
 if __name__ == '__main__':
     progname = os.path.basename(sys.argv[0])
     progdesc = 'Check hardware (sensors, fans, power) of Cisco devices.'
-    progversion = '1.2'
 
-    plugin = NagiosPluginSNMP(progname, progversion, progdesc)
+    plugin = NagiosPluginSNMP(progname, shared.__version__, progdesc)
 
     # OIDs for devices supporting CISCO-ENTITY-SENSOR-MIB
     oid_sensor_names_table = '1.3.6.1.2.1.47.1.1.1.1.7'         # from ENTITY-MIB

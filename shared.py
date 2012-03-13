@@ -2,7 +2,7 @@
 #===============================================================================
 # Filename      : plugin
 # Author        : Vincent BESANCON <besancon.vincent@gmail.com>
-# Description   : 
+# Description   : Some stuff shared for all plugins.
 #-------------------------------------------------------------------------------
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -17,3 +17,5 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #===============================================================================
+
+__version__ = '1.2'
