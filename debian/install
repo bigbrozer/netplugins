@@ -1,0 +1,11 @@
+check_blade_temp.pl             opt/faurecia/plugins/net/datacenter
+check_cisco_config.py           opt/faurecia/plugins/net/datacenter
+check_cisco_cpu_module.pl       opt/faurecia/plugins/net/datacenter
+check_cisco_cpu.py              opt/faurecia/plugins/net/datacenter
+check_cisco_hard.py             opt/faurecia/plugins/net/datacenter
+check_cisco_hsrp.py             opt/faurecia/plugins/net/datacenter
+check_cisco_temp.py             opt/faurecia/plugins/net/datacenter
+check_extreme_hard.py           opt/faurecia/plugins/net/datacenter
+check_extreme_loadsharing.pl    opt/faurecia/plugins/net/datacenter
+check_extreme_vrrp.py           opt/faurecia/plugins/net/datacenter
+shared.py                       opt/faurecia/plugins/net/datacenter
