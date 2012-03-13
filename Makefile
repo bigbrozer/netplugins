@@ -1,4 +1,8 @@
-clean: py-bytecode backup-files
+clean: pkg py-bytecode backup-files
+
+pkg:
+	@echo "Cleaning package creation directory..."
+	@rm -rf ./pkg-build
 
 py-bytecode:
 	@echo 'Cleaning Python byte code files...'
