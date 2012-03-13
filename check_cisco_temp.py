@@ -36,10 +36,10 @@ class CheckCiscoTEMP(NagiosPluginSNMP):
         super(CheckCiscoTEMP, self).define_plugin_arguments()
 
         # Add extra arguments
-        self.required_args.add_argument('-w', nargs=3, metavar=('5k_outlet', 'fex_outlet', 'fex_die'), type=int, dest='warnthr',
-                                  help='Warning threshold in percent for 5K Outlet, Fex Outlet and Fex Die.', required=True)
-        self.required_args.add_argument('-c', nargs=3, metavar=('5k_outlet', 'fex_outlet', 'fex_die'), type=int, dest='critthr',
-                                  help='Critical threshold in percent for 5K Outlet, Fex Outlet and Fex Die.', required=True)
+        self.required_args.add_argument('-w', nargs=3, metavar=('outlet', 'fex_outlet', 'fex_die'), type=int, dest='warnthr',
+                                  help='Warning threshold in percent for 5K Outlet / Catalyst, Fex Outlet and Fex Die (only on Nexus).', required=True)
+        self.required_args.add_argument('-c', nargs=3, metavar=('outlet', 'fex_outlet', 'fex_die'), type=int, dest='critthr',
+                                  help='Critical threshold in percent for 5K Outlet / Catalyst, Fex Outlet and Fex Die (only on Nexus).', required=True)
 
 # Function that verify thresholds
 def check_thresholds(sensor, value, warn, crit):
@@ -134,6 +134,8 @@ if __name__ == '__main__':
             check_thresholds(temp_descr, temp_value, fexout_warn, fexout_crit)
         elif re.search(r'^Fex.*Die', temp_descr):
             check_thresholds(temp_descr, temp_value, fexdie_warn, fexdie_crit)
+        else:
+            check_thresholds(temp_descr, temp_value, outlet_warn, outlet_crit)
 
     # Format output
     if nbr_crit > 0:
