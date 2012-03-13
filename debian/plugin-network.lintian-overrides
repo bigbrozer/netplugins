@@ -1,2 +1,3 @@
 plugin-network: dir-or-file-in-opt
+plugin-network: dir-or-file-in-opt opt/faurecia/
 plugin-network: python-script-but-no-python-dep
