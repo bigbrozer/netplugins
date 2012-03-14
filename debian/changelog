@@ -1,3 +1,9 @@
+plugin-network (1.2-1) stable; urgency=low
+
+  * Added midding folder contrib/ to package
+
+ -- Vincent BESANCON <vincent.besancon@faurecia.com>  Wed, 14 Mar 2012 10:50:27 +0100
+
 plugin-network (1.2) stable; urgency=low
 
   * Initial Release.
