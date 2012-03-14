@@ -1,4 +1,5 @@
 clean: pkg py-bytecode backup-files
+	@dh_clean
 
 pkg:
 	@echo "Cleaning package creation directory..."
