@@ -9,3 +9,4 @@ check_extreme_hard.py           opt/faurecia/plugins/net/datacenter
 check_extreme_loadsharing.pl    opt/faurecia/plugins/net/datacenter
 check_extreme_vrrp.py           opt/faurecia/plugins/net/datacenter
 shared.py                       opt/faurecia/plugins/net/datacenter
+contrib                         opt/faurecia/plugins/net/datacenter
