@@ -1,8 +1,11 @@
 plugin-network (1.2-1) stable; urgency=low
 
   * Added midding folder contrib/ to package
+  * Makefile: do a dh_clean for clean target
+  * Debian: change location of plugins to /usr/lib/faurecia
+  * Remove shared module, include version string in plugins
 
- -- Vincent BESANCON <vincent.besancon@faurecia.com>  Wed, 14 Mar 2012 10:50:27 +0100
+ -- Vincent BESANCON <vincent.besancon@faurecia.com>  Wed, 14 Mar 2012 11:15:24 +0100
 
 plugin-network (1.2) stable; urgency=low
 
