@@ -1,4 +1,4 @@
-plugin-network (1.2-1) stable; urgency=low
+plugin-network (1.2.1) stable; urgency=low
 
   * Added midding folder contrib/ to package
   * Makefile: do a dh_clean for clean target
