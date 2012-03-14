@@ -20,9 +20,10 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #===============================================================================
 
+__version__ = '1.2'
+
 import os, sys
 
-import shared
 from monitoring.nagios.plugin.snmp import NagiosPluginSNMP
 
 # Specific class for this plugin
@@ -46,7 +47,7 @@ if __name__ == '__main__':
     progname = os.path.basename(sys.argv[0])
     progdesc = 'Check HSRP on Cisco devices. Check if the router must be the active or standby router for VLANs.'
 
-    plugin = CheckCiscoHSRP(progname, shared.__version__, progdesc)
+    plugin = CheckCiscoHSRP(progname, __version__, progdesc)
 
     oid_hsrp_states = '1.3.6.1.4.1.9.9.106.1.2.1.1.15'
     oid_if_descr = '1.3.6.1.2.1.2.2.1.2'

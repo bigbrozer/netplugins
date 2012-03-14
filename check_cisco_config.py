@@ -20,10 +20,12 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #===============================================================================
 #
+
+__version__ = '1.2'
+
 import os, sys
 from time import strftime, localtime, time
 
-import shared
 from monitoring.nagios.plugin.snmp import NagiosPluginSNMP
 
 # The main procedure
@@ -31,7 +33,7 @@ if __name__ == '__main__':
     progname = os.path.basename(sys.argv[0])
     progdesc = 'Check config last change and last saved date time.'
 
-    plugin = NagiosPluginSNMP(progname, shared.__version__, progdesc)
+    plugin = NagiosPluginSNMP(progname, __version__, progdesc)
 
     oid_uptime = '1.3.6.1.2.1.1.3.0'
     oid_config_last_changed = '1.3.6.1.4.1.9.9.43.1.1.1.0'

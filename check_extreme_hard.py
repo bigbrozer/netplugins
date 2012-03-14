@@ -20,9 +20,11 @@
 #===============================================================================
 #
 #
+
+__version__ = '1.2'
+
 import os, sys
 
-import shared
 from monitoring.nagios.plugin.snmp import NagiosPluginSNMP
 
 # Specific class for this plugin
@@ -46,7 +48,7 @@ if __name__ == '__main__':
     progname = os.path.basename(sys.argv[0])
     progdesc = 'Check hardware (power only) of Extreme devices.'
 
-    plugin = CheckExtremeHard(progname, shared.__version__, progdesc)
+    plugin = CheckExtremeHard(progname, __version__, progdesc)
 
     oid_powers_status = '1.3.6.1.4.1.1916.1.1.1.27.1.2'
     oid_hard_status = oid_powers_status
