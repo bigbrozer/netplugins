@@ -1,7 +1,7 @@
 Network Plugins
 ===============
 
-Collection of scripts (plugins) to be used by Nagios or Shinken in order to check Cisco/Extreme/Blade (Nortel) devices.
+Collection of scripts (plugins) to be used by Nagios or Shinken in order to check Cisco/Extreme/Blade (Nortel) devices and other network related stuff.
 
 Download
 --------
