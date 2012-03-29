@@ -25,7 +25,8 @@ from monitoring.fabric import servers
 @roles('central')
 def upload():
     """Upload Debian package to central APT repository."""
-    run('rm /var/www/packages/apt/plugin-network_*.deb')
+    run('rm -f /var/www/packages/apt/plugin-network_*.deb')
+    run('rm -f /var/www/packages/apt/plugin-check-snmpnetstat_*.deb')
     put('pkg-build/*.deb', '/var/www/packages/apt')
     with cd('/var/www/packages/apt'):
         run('dpkg-scanpackages -m . > Packages')
