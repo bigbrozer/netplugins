@@ -1,7 +1,7 @@
-clean: pkg py-bytecode backup-files
+clean: py-bytecode backup-files
 	@dh_clean
 
-pkg:
+clean-deb:
 	@echo "Cleaning package creation directory..."
 	@rm -rf ./pkg-build
 
