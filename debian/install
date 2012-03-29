@@ -8,4 +8,5 @@ check_cisco_temp.py             usr/lib/faurecia/plugins/net
 check_extreme_hard.py           usr/lib/faurecia/plugins/net
 check_extreme_loadsharing.pl    usr/lib/faurecia/plugins/net
 check_extreme_vrrp.py           usr/lib/faurecia/plugins/net
+check_snmpnetstat.py            usr/lib/faurecia/plugins/net
 contrib                         usr/lib/faurecia/plugins/net
