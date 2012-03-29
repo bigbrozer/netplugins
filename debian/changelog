@@ -1,3 +1,10 @@
+plugin-network (1.2.2) stable; urgency=low
+
+  * Replaces package plugin-check-snmpnetstat.
+  * New plugin: check_snmpnetstat.py.
+
+ -- Vincent BESANCON <vincent.besancon@faurecia.com>  Thu, 29 Mar 2012 17:16:10 +0200
+
 plugin-network (1.2.1) stable; urgency=low
 
   * Added midding folder contrib/ to package
