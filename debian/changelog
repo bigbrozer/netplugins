@@ -1,3 +1,20 @@
+plugin-network (1.2.3) stable; urgency=low
+
+  * check_cisco_config.py: use monitoring 1.0.2.
+  * Create a shared module used between plugins.
+  * check_cisco_cpu.py: use monitoring 1.0.2.
+  * check_cisco_config.py: add a comment. lol.
+  * check_cisco_hard.py: use monitoring 1.0.2.
+  * check_cisco_hsrp.py: use monitoring 1.0.2.
+  * check_cisco_temp.py: use monitoring 1.0.2.
+  * check_extreme_hard.py: use monitoring 1.0.2.
+  * check_extreme_vrrp.py: use monitoring 1.0.2.
+  * check_snmpnetstat.py: use shared module to have the current plugin version.
+  * Package: install file shared.py.
+  * Fabfile: added tasks to build and tag the package.
+
+ -- Vincent BESANCON <vincent.besancon@faurecia.com>  Wed, 04 Apr 2012 12:05:28 +0200
+
 plugin-network (1.2.2) stable; urgency=low
 
   * Replaces package plugin-check-snmpnetstat.
