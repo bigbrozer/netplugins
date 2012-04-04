@@ -27,6 +27,7 @@ from time import strftime, localtime, time
 from shared import __version__
 from monitoring.nagios.plugin.snmp import NagiosPluginSNMP
 
+# The main procedure
 progname = os.path.basename(sys.argv[0])
 progdesc = 'Check config last change and last saved date time.'
 
