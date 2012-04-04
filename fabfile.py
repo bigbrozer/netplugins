@@ -36,6 +36,7 @@ def upload():
 def build():
     """Build the package."""
     local("git-buildpackage")
+    local("lintian pkg-build/*.dsc")
 
 @task
 @hosts('localhost')
