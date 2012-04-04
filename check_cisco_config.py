@@ -21,11 +21,10 @@
 #===============================================================================
 #
 
-__version__ = '1.2.2'
-
 import os, sys
 from time import strftime, localtime, time
 
+from shared import __version__
 from monitoring.nagios.plugin.snmp import NagiosPluginSNMP
 
 progname = os.path.basename(sys.argv[0])
