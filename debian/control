@@ -9,17 +9,7 @@ Vcs-Browser: http://monitoring-dc.app.corp/git/?p=plugins/network.git
 
 Package: plugin-network
 Architecture: all
-Provides: plugin-check-snmpnetstat
-Replaces: plugin-check-snmpnetstat (<< 1.2.2)
-Conflicts: plugin-check-snmpnetstat (<< 1.2.2)
-Depends: ${shlibs:Depends}, ${misc:Depends}, perl (>= 5.10), python (<< 2.8)
+Depends: ${misc:Depends}, perl (>= 5.10), python (<< 2.8)
 Description: Nagios/Shinken Network Plugins Collection
  This is the package to install Nagios/Shinken Network Plugins used to
  check Cisco/Nortel/Extreme equipments and other network related stuff.
-
-Package: plugin-check-snmpnetstat
-Architecture: all
-Depends: ${shlibs:Depends}, ${misc:Depends}, plugin-network
-Description: Transitional package for plugin-network
- This is a transitional package for plugin-check-snmpnetstat, and can be safely
- removed after the installation is complete.
