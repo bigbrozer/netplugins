@@ -31,3 +31,14 @@ def upload():
     with cd('/var/www/packages/apt'):
         run('dpkg-scanpackages -m . > Packages')
 
+@task
+@hosts('localhost')
+def build():
+    """Build the package."""
+    local("git-buildpackage")
+
+@task
+@hosts('localhost')
+def tag():
+    """Tag package version."""
+    local("git-buildpackage --git-tag-only")
