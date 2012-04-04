@@ -22,7 +22,7 @@
 
 import os, sys, argparse, subprocess, re
 
-__version__ = '1.2.2'
+from shared import __version__
 
 #-------------------------------------------------------------------------------
 ## START OF CONFIGURATION ######################################################
