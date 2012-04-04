@@ -18,7 +18,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #===============================================================================
 
-from fabric.api import task, cd, roles, put, run
+from fabric.api import task, cd, roles, hosts, put, run, local
 from monitoring.fabric import servers
 
 @task
