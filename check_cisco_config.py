@@ -28,40 +28,38 @@ from time import strftime, localtime, time
 
 from monitoring.nagios.plugin.snmp import NagiosPluginSNMP
 
-# The main procedure
-if __name__ == '__main__':
-    progname = os.path.basename(sys.argv[0])
-    progdesc = 'Check config last change and last saved date time.'
+progname = os.path.basename(sys.argv[0])
+progdesc = 'Check config last change and last saved date time.'
 
-    plugin = NagiosPluginSNMP(progname, __version__, progdesc)
+plugin = NagiosPluginSNMP(version=__version__, description=progdesc)
 
-    oid_uptime = '1.3.6.1.2.1.1.3.0'
-    oid_config_last_changed = '1.3.6.1.4.1.9.9.43.1.1.1.0'
-    oid_config_last_saved = '1.3.6.1.4.1.9.9.43.1.1.2.0'
+oid_uptime = '1.3.6.1.2.1.1.3.0'
+oid_config_last_changed = '1.3.6.1.4.1.9.9.43.1.1.1.0'
+oid_config_last_saved = '1.3.6.1.4.1.9.9.43.1.1.2.0'
 
-    uptime = plugin.snmpget(oid_uptime)
-    config_last_changed = plugin.snmpget(oid_config_last_changed)
-    config_last_saved = plugin.snmpget(oid_config_last_saved)
+uptime = plugin.snmpget(oid_uptime)
+config_last_changed = plugin.snmpget(oid_config_last_changed)
+config_last_saved = plugin.snmpget(oid_config_last_saved)
 
-    # Date calculations
-    delta_time_changed = abs(long(uptime[1]) - long(config_last_changed[1])) / 100
-    delta_time_saved = abs(long(uptime[1]) - long(config_last_saved[1])) / 100
+# Date calculations
+delta_time_changed = abs(long(uptime[1]) - long(config_last_changed[1])) / 100
+delta_time_saved = abs(long(uptime[1]) - long(config_last_saved[1])) / 100
 
-    config_last_changed_date = localtime(time() - delta_time_changed)
-    config_last_changed_date_str = strftime('%d/%m/%Y %H:%M', config_last_changed_date)
-    config_last_saved_date = localtime(time() - delta_time_saved)
-    config_last_saved_date_str = strftime('%d/%m/%Y %H:%M', config_last_saved_date)
+config_last_changed_date = localtime(time() - delta_time_changed)
+config_last_changed_date_str = strftime('%d/%m/%Y %H:%M', config_last_changed_date)
+config_last_saved_date = localtime(time() - delta_time_saved)
+config_last_saved_date_str = strftime('%d/%m/%Y %H:%M', config_last_saved_date)
 
-    # Formating output
-    longoutput = 'Config last changed: %s\nConfig last saved: %s' % (
-        config_last_changed_date_str,
-        config_last_saved_date_str,
-    )
+# Formating output
+longoutput = 'Config last changed: %s\nConfig last saved: %s' % (
+    config_last_changed_date_str,
+    config_last_saved_date_str,
+)
 
-    # Checking state of config date
-    if config_last_changed_date > config_last_saved_date:
-        output = 'Config was changed without saving on %s !\n' % config_last_changed_date_str
-        plugin.warning(output + longoutput)
-    else:
-        output = 'Running configuration was saved on %s.\n' % config_last_saved_date_str
-        plugin.ok(output + longoutput)
+# Checking state of config date
+if config_last_changed_date > config_last_saved_date:
+    output = 'Config was changed without saving on %s !\n' % config_last_changed_date_str
+    plugin.warning(output + longoutput)
+else:
+    output = 'Running configuration was saved on %s.\n' % config_last_saved_date_str
+    plugin.ok(output + longoutput)
