@@ -21,12 +21,10 @@
 #
 #
 
-__version__ = '1.2.2'
-
 import logging as log
 import re
-import os, sys
 
+from shared import __version__
 from monitoring.nagios.plugin.snmp import NagiosPluginSNMP
 
 logger = log.getLogger('plugin')
@@ -73,91 +71,89 @@ def check_thresholds(sensor, value, warn, crit):
     )
 
 # The main procedure
-if __name__ == '__main__':
-    progname = os.path.basename(sys.argv[0])
-    progdesc = 'Check all temperature on Cisco devices and alert if one is above thresholds.'
+progdesc = 'Check all temperature on Cisco devices and alert if one is above thresholds.'
 
-    plugin = CheckCiscoTEMP(progname, __version__, progdesc)
+plugin = CheckCiscoTEMP(version=__version__, description=progdesc)
 
-    # OIDs
-    oid_sensor_types = '1.3.6.1.4.1.9.9.91.1.1.1.1.1'   # From CISCO-ENTITY-SENSOR-MIB
-    oid_sensor_values = '1.3.6.1.4.1.9.9.91.1.1.1.1.4'  # From CISCO-ENTITY-SENSOR-MIB
-    oid_entity_names = '1.3.6.1.2.1.47.1.1.1.1.7'       # From ENTITY-MIB
+# OIDs
+oid_sensor_types = '1.3.6.1.4.1.9.9.91.1.1.1.1.1'   # From CISCO-ENTITY-SENSOR-MIB
+oid_sensor_values = '1.3.6.1.4.1.9.9.91.1.1.1.1.4'  # From CISCO-ENTITY-SENSOR-MIB
+oid_entity_names = '1.3.6.1.2.1.47.1.1.1.1.7'       # From ENTITY-MIB
 
-    # Store temp data
-    temp_data = []
+# Store temp data
+temp_data = []
 
-    # Get all "celsius" sensor types
-    sensor_types = plugin.snmpnext(oid_sensor_types)
-    if sensor_types:
-        for type in sensor_types:
-            logger.debug('Sensor type is: %s' % type[1])
+# Get all "celsius" sensor types
+sensor_types = plugin.snmpnext(oid_sensor_types)
+if sensor_types:
+    for type in sensor_types:
+        logger.debug('Sensor type is: %s' % type[1])
 
-            # If sensor type is celsius(8)
-            if type[1] == 8:
-                sensor_index = type[0][-1]
-                sensor_name = plugin.snmpget('%s.%s' % (oid_entity_names, sensor_index))
-                sensor_value = plugin.snmpget('%s.%s' % (oid_sensor_values, sensor_index))
-                temp_data.append((str(sensor_name[1]), int(sensor_value[1])))
-            else:
-                logger.debug('Skipping sensor type: %s' % type[1])
-    else:
-        plugin.unknown('SNMP Query Error: query all sensor types returned no result !')
-
-    logger.debug('Temp data: %s' % temp_data)
-
-    # Check thresholds and format output to Nagios
-    longoutput = ""
-    longoutput_crit = ""
-    longoutput_warn = ""
-    longoutput_ok = ""
-    output = ""
-    perfdata = "| "
-    exit_code = 0
-    nbr_error = 0
-    nbr_crit = 0
-    nbr_warn = 0
-    nbr_ok = 0
-    count = 0
-
-    # Expand tuple of thresholds
-    outlet_warn, fexout_warn, fexdie_warn = plugin.options.warnthr
-    outlet_crit, fexout_crit, fexdie_crit = plugin.options.critthr
-
-    for temp in temp_data:
-        count += 1
-        temp_descr, temp_value = temp
-
-        # Check 5K Outlet thresholds
-        logger.debug('Processing sensor %s.' % temp_descr)
-        if re.search(r'^Module.*Outlet', temp_descr):
-            check_thresholds(temp_descr, temp_value, outlet_warn, outlet_crit)
-        elif re.search(r'^Fex.*Outlet', temp_descr):
-            check_thresholds(temp_descr, temp_value, fexout_warn, fexout_crit)
-        elif re.search(r'^Fex.*Die', temp_descr):
-            check_thresholds(temp_descr, temp_value, fexdie_warn, fexdie_crit)
+        # If sensor type is celsius(8)
+        if type[1] == 8:
+            sensor_index = type[0][-1]
+            sensor_name = plugin.snmpget('%s.%s' % (oid_entity_names, sensor_index))
+            sensor_value = plugin.snmpget('%s.%s' % (oid_sensor_values, sensor_index))
+            temp_data.append((str(sensor_name[1]), int(sensor_value[1])))
         else:
-            check_thresholds(temp_descr, temp_value, outlet_warn, outlet_crit)
+            logger.debug('Skipping sensor type: %s' % type[1])
+else:
+    plugin.unknown('SNMP Query Error: query all sensor types returned no result !')
 
-    # Format output
-    if nbr_crit > 0:
-        longoutput += 'Critical: (%d)\n%s\n' % (nbr_crit, longoutput_crit)
-    if nbr_warn > 0:
-        longoutput += 'Warning: (%d)\n%s\n' % (nbr_warn, longoutput_warn)
-    if nbr_ok > 0:
-        longoutput += 'OK: (%d)\n%s\n' % (nbr_ok, longoutput_ok)
+logger.debug('Temp data: %s' % temp_data)
 
-    # Add perfdata
-    longoutput += perfdata
+# Check thresholds and format output to Nagios
+longoutput = ""
+longoutput_crit = ""
+longoutput_warn = ""
+longoutput_ok = ""
+output = ""
+perfdata = "| "
+exit_code = 0
+nbr_error = 0
+nbr_crit = 0
+nbr_warn = 0
+nbr_ok = 0
+count = 0
 
-    # Output to Nagios
-    longoutput = longoutput.rstrip('\n')
-    if exit_code == 2:
-        output = '%d temperature sensor above thresholds !\n' % nbr_error
-        plugin.critical(output + longoutput)
-    elif exit_code == 1:
-        output = '%d temperature sensor above thresholds !\n' % nbr_error
-        plugin.warning(output + longoutput)
-    elif not exit_code:
-        output = 'All temperature sensor are below thresholds.\n'
-        plugin.ok(output + longoutput)
+# Expand tuple of thresholds
+outlet_warn, fexout_warn, fexdie_warn = plugin.options.warnthr
+outlet_crit, fexout_crit, fexdie_crit = plugin.options.critthr
+
+for temp in temp_data:
+    count += 1
+    temp_descr, temp_value = temp
+
+    # Check 5K Outlet thresholds
+    logger.debug('Processing sensor %s.' % temp_descr)
+    if re.search(r'^Module.*Outlet', temp_descr):
+        check_thresholds(temp_descr, temp_value, outlet_warn, outlet_crit)
+    elif re.search(r'^Fex.*Outlet', temp_descr):
+        check_thresholds(temp_descr, temp_value, fexout_warn, fexout_crit)
+    elif re.search(r'^Fex.*Die', temp_descr):
+        check_thresholds(temp_descr, temp_value, fexdie_warn, fexdie_crit)
+    else:
+        check_thresholds(temp_descr, temp_value, outlet_warn, outlet_crit)
+
+# Format output
+if nbr_crit > 0:
+    longoutput += 'Critical: (%d)\n%s\n' % (nbr_crit, longoutput_crit)
+if nbr_warn > 0:
+    longoutput += 'Warning: (%d)\n%s\n' % (nbr_warn, longoutput_warn)
+if nbr_ok > 0:
+    longoutput += 'OK: (%d)\n%s\n' % (nbr_ok, longoutput_ok)
+
+# Add perfdata
+longoutput += perfdata
+
+# Output to Nagios
+longoutput = longoutput.rstrip('\n')
+if exit_code == 2:
+    output = '%d temperature sensor above thresholds !\n' % nbr_error
+    plugin.critical(output + longoutput)
+elif exit_code == 1:
+    output = '%d temperature sensor above thresholds !\n' % nbr_error
+    plugin.warning(output + longoutput)
+elif not exit_code:
+    output = 'All temperature sensor are below thresholds.\n'
+    plugin.ok(output + longoutput)
