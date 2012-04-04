@@ -21,16 +21,13 @@
 #
 #
 
-__version__ = '1.2.2'
-
-import os, sys
-
+from shared import __version__
 from monitoring.nagios.plugin.snmp import NagiosPluginSNMP
 
 # Specific class for this plugin
 class CheckExtremeHard(NagiosPluginSNMP):
-    def __init__(self, name, version, description):
-        super(CheckExtremeHard, self).__init__(name, version, description)
+    def initialize(self):
+        super(CheckExtremeHard, self).initialize()
         # 1normal,2warning,3critical,4shutdown,5notPresent,6notFunctioning
         self.statusname = {1: 'Not present', 2: 'Normal', 3: 'Error'}
 
@@ -44,40 +41,38 @@ class CheckExtremeHard(NagiosPluginSNMP):
                                   help='Type of hardware to check.', required=True)
 
 # The main procedure
-if __name__ == '__main__':
-    progname = os.path.basename(sys.argv[0])
-    progdesc = 'Check hardware (power only) of Extreme devices.'
+progdesc = 'Check hardware (power only) of Extreme devices.'
 
-    plugin = CheckExtremeHard(progname, __version__, progdesc)
+plugin = CheckExtremeHard(version=__version__, description=progdesc)
 
-    oid_powers_status = '1.3.6.1.4.1.1916.1.1.1.27.1.2'
-    oid_hard_status = oid_powers_status
+oid_powers_status = '1.3.6.1.4.1.1916.1.1.1.27.1.2'
+oid_hard_status = oid_powers_status
 
-    hard_status = plugin.snmpnext(oid_hard_status)
+hard_status = plugin.snmpnext(oid_hard_status)
 
-    # Checking state of hardware
-    longoutput = ""
-    output = ""
-    exit_code = 0
-    nbr_error = 0
-    i = 0
-    for power in hard_status:
-        state_code = power[1]
-        power_name = 'Power%d' % i
+# Checking state of hardware
+longoutput = ""
+output = ""
+exit_code = 0
+nbr_error = 0
+i = 0
+for power in hard_status:
+    state_code = power[1]
+    power_name = 'Power%d' % i
 
-        if state_code != 2:
-            longoutput += '** %s: %s **\n' % (power_name, plugin.statusname[state_code])
-            nbr_error += 1
-            exit_code = 1
-        else:
-            longoutput += '%s: %s\n' % (power_name, plugin.statusname[state_code])
-        i += 1
+    if state_code != 2:
+        longoutput += '** %s: %s **\n' % (power_name, plugin.statusname[state_code])
+        nbr_error += 1
+        exit_code = 1
+    else:
+        longoutput += '%s: %s\n' % (power_name, plugin.statusname[state_code])
+    i += 1
 
-    # Formatting output
-    longoutput = longoutput.rstrip('\n')
-    if exit_code == 1:
-        output = '%d %s health in error !\n' % (nbr_error, plugin.options.type.title())
-        plugin.critical(output + longoutput)
-    elif not exit_code:
-        output = '%s health is good.\n' % plugin.options.type.title()
-        plugin.ok(output + longoutput)
+# Formatting output
+longoutput = longoutput.rstrip('\n')
+if exit_code == 1:
+    output = '%d %s health in error !\n' % (nbr_error, plugin.options.type.title())
+    plugin.critical(output + longoutput)
+elif not exit_code:
+    output = '%s health is good.\n' % plugin.options.type.title()
+    plugin.ok(output + longoutput)
