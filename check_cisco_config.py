@@ -25,7 +25,7 @@ import os, sys
 from time import strftime, localtime, time
 
 from shared import __version__
-from monitoring.nagios.plugin.snmp import NagiosPluginSNMP
+from monitoring.nagios.plugin import NagiosPluginSNMP
 
 # The main procedure
 progname = os.path.basename(sys.argv[0])
@@ -33,17 +33,17 @@ progdesc = 'Check config last change and last saved date time.'
 
 plugin = NagiosPluginSNMP(version=__version__, description=progdesc)
 
-oid_uptime = '1.3.6.1.2.1.1.3.0'
-oid_config_last_changed = '1.3.6.1.4.1.9.9.43.1.1.1.0'
-oid_config_last_saved = '1.3.6.1.4.1.9.9.43.1.1.2.0'
+oids = {
+    'uptime': '1.3.6.1.2.1.1.3.0',
+    'config_last_changed': '1.3.6.1.4.1.9.9.43.1.1.1.0',
+    'config_last_saved': '1.3.6.1.4.1.9.9.43.1.1.2.0',
+}
 
-uptime = plugin.snmpget(oid_uptime)
-config_last_changed = plugin.snmpget(oid_config_last_changed)
-config_last_saved = plugin.snmpget(oid_config_last_saved)
+query = plugin.snmp.get(oids)
 
 # Date calculations
-delta_time_changed = abs(long(uptime[1]) - long(config_last_changed[1])) / 100
-delta_time_saved = abs(long(uptime[1]) - long(config_last_saved[1])) / 100
+delta_time_changed = abs(long(query['uptime']) - long(query['config_last_changed'])) / 100
+delta_time_saved = abs(long(query['uptime']) - long(query['config_last_saved'])) / 100
 
 config_last_changed_date = localtime(time() - delta_time_changed)
 config_last_changed_date_str = strftime('%d/%m/%Y %H:%M', config_last_changed_date)
