@@ -25,7 +25,7 @@ import logging as log
 import os, sys
 
 from shared import __version__
-from monitoring.nagios.plugin.snmp import NagiosPluginSNMP
+from monitoring.nagios.plugin import NagiosPluginSNMP
 
 logger = log.getLogger('plugin')
 
@@ -46,25 +46,23 @@ progdesc = 'Check all CPUs usage on Cisco devices supporting CISCO-PROCESS-MIB.'
 
 plugin = CheckCiscoCPU(version=__version__, description=progdesc)
 
-oid_entity_name = '1.3.6.1.2.1.47.1.1.1.1.7'
-oid_cpu_indexes = '1.3.6.1.4.1.9.9.109.1.1.1.1.2'
-oid_cpu_usages = '1.3.6.1.4.1.9.9.109.1.1.1.1.8'
+oids = {
+    'entity_name': '1.3.6.1.2.1.47.1.1.1.1.7',
+    'cpu_indexes': '1.3.6.1.4.1.9.9.109.1.1.1.1.2',
+    'cpu_usages': '1.3.6.1.4.1.9.9.109.1.1.1.1.8',
+}
 
-logger.debug('====== Getting indexes...')
-cpu_indexes = plugin.snmpnext(oid_cpu_indexes)
-cpu_usages = plugin.snmpnext(oid_cpu_usages)
-
-if not len(cpu_usages):
-    plugin.unknown('SNMP query error: query returned no result !')
+logger.debug('====== Query host...')
+query = plugin.snmp.getnext(oids)
 
 cpu_data = {}
 logger.debug('====== Getting name for CPU module...')
-for i in range(0, len(cpu_usages)):
+for i in range(0, len(query['cpu_usages'])):
     try:
-        cpu_index = cpu_indexes[i][1]
+        cpu_index = query['cpu_indexes'][i][1]
         if cpu_index:
-            logger.debug('\tCPU index found.')
-            cpu_name = str(plugin.snmpget('%s.%s' % (oid_entity_name, cpu_index))[1])
+            logger.debug('\tCPU index found: %s' % cpu_index)
+            cpu_name = [n for x, n in query['entity_name'] if x == cpu_index][0].prettyPrint()
         else:
             logger.debug('\tCPU index cannot be determined. Generating name...')
             raise IndexError()
@@ -73,7 +71,7 @@ for i in range(0, len(cpu_usages)):
         cpu_name = 'CPU%d' % i
 
     logger.debug('\tCPU name: %s' % cpu_name)
-    cpu_data[cpu_name] = int(cpu_usages[i][1])
+    cpu_data[cpu_name] = int(query['cpu_usages'][i][1])
 
 # Checking values if in thresholds and formatting output
 output = ""
