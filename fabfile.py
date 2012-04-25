@@ -30,6 +30,8 @@ def upload():
     put('pkg-build/*.deb', '/var/www/packages/apt')
     with cd('/var/www/packages/apt'):
         run('dpkg-scanpackages -m . > Packages')
+        run('apt-ftparchive release . > Release')
+        run('gpg --output Release.gpg -ba Release')
 
 @task
 @hosts('localhost')
