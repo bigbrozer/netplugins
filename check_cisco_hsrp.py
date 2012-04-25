@@ -23,7 +23,7 @@
 import os, sys
 
 from shared import __version__
-from monitoring.nagios.plugin.snmp import NagiosPluginSNMP
+from monitoring.nagios.plugin import NagiosPluginSNMP
 
 # Specific class for this plugin
 class CheckCiscoHSRP(NagiosPluginSNMP):
@@ -48,11 +48,13 @@ progdesc = 'Check HSRP on Cisco devices. Check if the router must be the active 
 
 plugin = CheckCiscoHSRP(version=__version__, description=progdesc)
 
-oid_hsrp_states = '1.3.6.1.4.1.9.9.106.1.2.1.1.15'
-oid_if_descr = '1.3.6.1.2.1.2.2.1.2'
+oids = {
+    'hsrp_states': '1.3.6.1.4.1.9.9.106.1.2.1.1.15',
+    'if_descr': '1.3.6.1.2.1.2.2.1.2',
+}
 
-hsrp_states = plugin.snmpnext(oid_hsrp_states)
-if not hsrp_states:
+query = plugin.snmp.getnext(oids)
+if not query.has_key('hsrp_states'):
     raise plugin.unknown('No data about HSRP on this device !')
 
 # Checking state of HSRP for all interfaces
@@ -60,17 +62,17 @@ longoutput = ""
 output = ""
 exit_code = 0
 nbr_error = 0
-for state in hsrp_states:
-    ifIndex = state[0][-2]
-    ifDescr = plugin.snmpget('%s.%s' % (oid_if_descr, ifIndex))
+for state in query['hsrp_states']:
+    ifIndex = int(state.oid.split('.')[-2])
+    ifDescr = [i.pretty() for i in query['if_descr'] if i.index == ifIndex][0]
 
-    if state[1] != plugin.roleid[plugin.options.role]:
+    if state.value != plugin.roleid[plugin.options.role]:
         longoutput += '** %s is in state %s (must be %s) **\n' % (
-        ifDescr[1], plugin.rolename[state[1]], plugin.options.role)
+        ifDescr, plugin.rolename[state.value], plugin.options.role)
         nbr_error += 1
         exit_code = 1
     else:
-        longoutput += '%s is in state %s\n' % (ifDescr[1], plugin.options.role)
+        longoutput += '%s is in state %s\n' % (ifDescr, plugin.options.role)
 
 longoutput = longoutput.rstrip('\n')
 if exit_code == 1:
