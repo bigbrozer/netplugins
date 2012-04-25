@@ -42,8 +42,8 @@ oids = {
 query = plugin.snmp.get(oids)
 
 # Date calculations
-delta_time_changed = abs(long(query['uptime']) - long(query['config_last_changed'])) / 100
-delta_time_saved = abs(long(query['uptime']) - long(query['config_last_saved'])) / 100
+delta_time_changed = abs(long(query['uptime'].value) - long(query['config_last_changed'].value)) / 100
+delta_time_saved = abs(long(query['uptime'].value) - long(query['config_last_saved'].value)) / 100
 
 config_last_changed_date = localtime(time() - delta_time_changed)
 config_last_changed_date_str = strftime('%d/%m/%Y %H:%M', config_last_changed_date)
