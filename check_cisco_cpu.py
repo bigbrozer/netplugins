@@ -71,10 +71,10 @@ cpu_data = {}
 logger.debug('====== Getting name for CPU module...')
 for i in range(0, len(query['cpu_usages'])):
     try:
-        cpu_index = query['cpu_indexes'][i][1]
+        cpu_index = query['cpu_indexes'][i].value
         if cpu_index:
             logger.debug('\tCPU index found: %s' % cpu_index)
-            cpu_name = [n for x, n in query['entity_name'] if x == cpu_index][0].prettyPrint()
+            cpu_name = [e.pretty() for e in query['entity_name'] if e.index == cpu_index][0]
         else:
             logger.debug('\tCPU index cannot be determined. Generating name...')
             raise IndexError()
@@ -83,7 +83,7 @@ for i in range(0, len(query['cpu_usages'])):
         cpu_name = 'CPU%d' % i
 
     logger.debug('\tCPU name: %s' % cpu_name)
-    cpu_data[cpu_name] = int(query['cpu_usages'][i][1])
+    cpu_data[cpu_name] = int(query['cpu_usages'][i].value)
 
 # Checking values if in thresholds and formatting output
 output = ""
