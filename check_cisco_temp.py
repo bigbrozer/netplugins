@@ -25,7 +25,7 @@ import logging as log
 import re
 
 from shared import __version__
-from monitoring.nagios.plugin.snmp import NagiosPluginSNMP
+from monitoring.nagios.plugin import NagiosPluginSNMP
 
 logger = log.getLogger('plugin')
 
@@ -38,9 +38,17 @@ class CheckCiscoTEMP(NagiosPluginSNMP):
 
         # Add extra arguments
         self.required_args.add_argument('-w', nargs=3, metavar=('outlet', 'fex_outlet', 'fex_die'), type=int, dest='warnthr',
-                                  help='Warning threshold in percent for 5K Outlet / Catalyst, Fex Outlet and Fex Die (only on Nexus).', required=True)
+                                  help='Warning threshold for 5K Outlet / Catalyst, Fex Outlet and Fex Die (only on Nexus).', required=True)
         self.required_args.add_argument('-c', nargs=3, metavar=('outlet', 'fex_outlet', 'fex_die'), type=int, dest='critthr',
-                                  help='Critical threshold in percent for 5K Outlet / Catalyst, Fex Outlet and Fex Die (only on Nexus).', required=True)
+                                  help='Critical threshold for 5K Outlet / Catalyst, Fex Outlet and Fex Die (only on Nexus).', required=True)
+
+    def verify_plugin_arguments(self):
+        """Do arguments checks"""
+        super(CheckCiscoTEMP, self).verify_plugin_arguments()
+
+        # Be sure that warning is not above critical
+        if self.options.warnthr >= self.options.critthr:
+            raise self.unknown('Warning threshold cannot be >= critical threshold.')
 
 # Function that verify thresholds
 def check_thresholds(sensor, value, warn, crit):
@@ -75,28 +83,25 @@ progdesc = 'Check all temperature on Cisco devices and alert if one is above thr
 
 plugin = CheckCiscoTEMP(version=__version__, description=progdesc)
 
-# OIDs
-oid_sensor_types = '1.3.6.1.4.1.9.9.91.1.1.1.1.1'   # From CISCO-ENTITY-SENSOR-MIB
-oid_sensor_values = '1.3.6.1.4.1.9.9.91.1.1.1.1.4'  # From CISCO-ENTITY-SENSOR-MIB
-oid_entity_names = '1.3.6.1.2.1.47.1.1.1.1.7'       # From ENTITY-MIB
+oids = {
+    'sensor_types': '1.3.6.1.4.1.9.9.91.1.1.1.1.1',     # From CISCO-ENTITY-SENSOR-MIB
+    'sensor_values': '1.3.6.1.4.1.9.9.91.1.1.1.1.4',     # From CISCO-ENTITY-SENSOR-MIB
+    'entity_names': '1.3.6.1.2.1.47.1.1.1.1.7',         # From ENTITY-MIB
+}
+
+query = plugin.snmp.getnext(oids)
 
 # Store temp data
 temp_data = []
 
 # Get all "celsius" sensor types
-sensor_types = plugin.snmpnext(oid_sensor_types)
-if sensor_types:
-    for type in sensor_types:
-        logger.debug('Sensor type is: %s' % type[1])
-
+if query.has_key('sensor_types'):
+    for type in query['sensor_types']:
         # If sensor type is celsius(8)
-        if type[1] == 8:
-            sensor_index = type[0][-1]
-            sensor_name = plugin.snmpget('%s.%s' % (oid_entity_names, sensor_index))
-            sensor_value = plugin.snmpget('%s.%s' % (oid_sensor_values, sensor_index))
-            temp_data.append((str(sensor_name[1]), int(sensor_value[1])))
-        else:
-            logger.debug('Skipping sensor type: %s' % type[1])
+        if type.value == 8:
+            sensor_name = [e.pretty() for e in query['entity_names'] if e.index == type.index][0]
+            sensor_value = [e.value for e in query['sensor_values'] if e.index == type.index][0]
+            temp_data.append((sensor_name, sensor_value))
 else:
     plugin.unknown('SNMP Query Error: query all sensor types returned no result !')
 
