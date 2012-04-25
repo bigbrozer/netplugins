@@ -40,6 +40,18 @@ class CheckCiscoCPU(NagiosPluginSNMP):
         self.required_args.add_argument('-w', type=int, dest='warnthr', help='Warning threshold in percent (eg. 80)', required=True)
         self.required_args.add_argument('-c', type=int, dest='critthr', help='Critical threshold in percent (eg. 90)', required=True)
 
+
+    def verify_plugin_arguments(self):
+        """Do arguments checks"""
+        super(CheckCiscoCPU, self).verify_plugin_arguments()
+
+        # Be sure that warning is not above critical
+        if self.options.warnthr > 100 or self.options.critthr > 100:
+            raise self.unknown('Thresholds cannot be > 100 percent.')
+        elif self.options.warnthr >= self.options.critthr:
+            raise self.unknown('Warning threshold cannot be >= critical threshold.')
+
+
 # The main procedure
 progname = os.path.basename(sys.argv[0])
 progdesc = 'Check all CPUs usage on Cisco devices supporting CISCO-PROCESS-MIB.'
