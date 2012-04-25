@@ -1,3 +1,20 @@
+plugin-network (1.2.4) stable; urgency=low
+
+  * Start a new minor version v1.2.4.
+  * check_cisco_config.py: update because of changes introduced in monitoring package v1.0.4.
+  * check_cisco_cpu.py: update because of changes introduced in monitoring package v1.0.4.
+  * check_cisco_cpu.py: add more arguments validation for thresholds.
+  * check_cisco_config.py: updated to make use of OidValue attributes.
+  * check_cisco_cpu.py: updated to make use of OidValue attributes.
+  * check_cisco_hard.py: update because of changes introduced in monitoring package v1.0.4.
+  * check_cisco_hsrp.py: update because of changes introduced in monitoring package v1.0.4.
+  * check_cisco_temp.py: update because of changes introduced in monitoring package v1.0.4.
+  * check_snmpnetstat.py: added --version.
+  * Extreme plugins: we do not have anymore devices from this brand. Deleted plugins.
+  * Fabfile: launch apt-ftparchive on central to generate Release file and sign it.
+
+ -- Vincent BESANCON <vincent.besancon@faurecia.com>  Wed, 25 Apr 2012 17:38:35 +0200
+
 plugin-network (1.2.3) stable; urgency=low
 
   * check_cisco_config.py: use monitoring 1.0.2.
