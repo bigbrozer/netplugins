@@ -72,6 +72,7 @@ parser_extra_group.add_argument("-m", "--match", dest="match", default='',
                     help="Show only lines that match this string (default to 'all')")
 parser_extra_group.add_argument("--no-dns", action="store_true", dest="no_dns",
                     help="Do not try to use DNS to interpret IP addresses (off by default)")
+parser.add_argument('--version', action='version', version='%s %s' % (progname, __version__))
 
 # Parse arguments on command line
 options = parser.parse_args()
