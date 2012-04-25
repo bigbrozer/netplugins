@@ -25,8 +25,7 @@ import logging as log
 import os, sys
 
 from shared import __version__
-from monitoring.nagios.plugin.snmp import NagiosPluginSNMP
-from monitoring.utils.snmp import convert_tuple_to_oid
+from monitoring.nagios.plugin import NagiosPluginSNMP
 
 logger = log.getLogger('plugin')
 
@@ -36,32 +35,35 @@ progdesc = 'Check hardware (sensors, fans, power) of Cisco devices.'
 
 plugin = NagiosPluginSNMP(version=__version__, description=progdesc)
 
-# OIDs for devices supporting CISCO-ENTITY-SENSOR-MIB
-oid_sensor_names_table = '1.3.6.1.2.1.47.1.1.1.1.7'         # from ENTITY-MIB
-oid_sensors_status_table = '1.3.6.1.4.1.9.9.91.1.1.1.1.5'   # from CISCO-ENTITY-SENSOR-MIB
-
-# OIDs for devices supporting CISCO-ENVMON-MIB
-oid_envmon_fan_status_table = '1.3.6.1.4.1.9.9.13.1.4.1'      # from CISCO-ENVMON-MIB
-oid_envmon_power_status_table = '1.3.6.1.4.1.9.9.13.1.5.1'    # from CISCO-ENVMON-MIB
-
-oid_envmon_fan_status = '%s.3' % oid_envmon_fan_status_table
-oid_envmon_power_status = '%s.3' % oid_envmon_power_status_table
+oids = {
+    # For devices supporting CISCO-ENTITY-SENSOR-MIB
+    'sensor_names': '1.3.6.1.2.1.47.1.1.1.1.7',             # from ENTITY-MIB
+    'sensors_status': '1.3.6.1.4.1.9.9.91.1.1.1.1.5',       # from CISCO-ENTITY-SENSOR-MIB
+    # For devices supporting CISCO-ENVMON-MIB
+    'envmon_fan_status': '1.3.6.1.4.1.9.9.13.1.4.1.3',      # from CISCO-ENVMON-MIB
+    'envmon_power_status': '1.3.6.1.4.1.9.9.13.1.5.1.3',    # from CISCO-ENVMON-MIB
+}
 
 # Store all sensors data
 sensor_data = []
 
 # Query using CISCO-ENTITY-SENSOR-MIB be default, fallback to CISCO-ENVMON-MIB
-sensor_status_list = plugin.snmpnext(oid_sensors_status_table)
-if not sensor_status_list:
+query = plugin.snmp.getnext(oids)
+
+# Return OK if no hardware sensor support is available
+if not query.has_key('sensors_status') \
+   and not query.has_key('envmon_fan_status') \
+   and not query.has_key('envmon_power_status'):
+    plugin.ok('No support for hardware sensor available.')
+
+if not query.has_key('sensors_status'):
     # Does not support CISCO-ENTITY-SENSOR-MIB
     logger.debug('Device not supporting CISCO-ENTITY-SENSOR-MIB, fallback.')
-    sensor_status_list = plugin.snmpnext(oid_envmon_fan_status)
-    sensor_status_list.extend(plugin.snmpnext(oid_envmon_power_status))
 
-    for sensor in sensor_status_list:
-        sensor_index = sensor[0][-1]
-        sensor_name = plugin.snmpget('%s.2.%s' % (convert_tuple_to_oid(sensor[0][0:12]), sensor_index))[1]
-        sensor_status = sensor[1]
+    sensor_status = query['envmon_fan_status'] + query['envmon_power_status']
+    for sensor in sensor_status:
+        sensor_name = [e.pretty() for e in query['sensor_names'] if e.index == sensor.index][0]
+        sensor_status = sensor.value
 
         # Skip sensor status marked as unavailable(2)
         if sensor_status == 5:
@@ -71,10 +73,10 @@ if not sensor_status_list:
 else:
     # Support CISCO-ENTITY-SENSOR-MIB
     logger.debug('Device supporting CISCO-ENTITY-SENSOR-MIB, continue.')
-    for sensor in sensor_status_list:
-        sensor_index = sensor[0][-1]
-        sensor_name = plugin.snmpget('%s.%s' % (oid_sensor_names_table, sensor_index))[1]
-        sensor_status = sensor[1]
+    sensor_status = query['sensors_status']
+    for sensor in sensor_status:
+        sensor_name = [e.pretty() for e in query['sensor_names'] if e.index == sensor.index][0]
+        sensor_status = sensor.value
 
         # Skip sensor status marked as unavailable(2)
         if sensor_status == 2:
@@ -84,10 +86,6 @@ else:
 
 logger.debug('Sensor data:')
 logger.debug('\t%s' % sensor_data)
-
-# Return OK if no hardware sensor support is available
-if not len(sensor_data):
-    plugin.ok('No support for hardware sensor available.')
 
 # Check thresholds and format output to Nagios
 longoutput = ""
