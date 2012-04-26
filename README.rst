@@ -3,6 +3,13 @@ Network Plugins
 
 Collection of scripts (plugins) to be used by Nagios or Shinken in order to check Cisco/Extreme/Blade (Nortel) devices and other network related stuff.
 
+Requirements
+------------
+
+- `monitoring <https://github.com/bigbrozer/monitoring>`_ package.
+
+To install using pip: ``$ pip install --upgrade git+http://github.com/bigbrozer/monitoring.git``.
+
 Download
 --------
 
