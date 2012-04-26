@@ -77,8 +77,8 @@ for i in range(0, len(query['cpu_usages'])):
             cpu_name = [e.pretty() for e in query['entity_name'] if e.index == cpu_index][0]
         else:
             logger.debug('\tCPU index cannot be determined. Generating name...')
-            raise IndexError()
-    except IndexError:
+            raise KeyError()
+    except KeyError:
         # Set a default name for the CPU module
         cpu_name = 'CPU%d' % i
 
