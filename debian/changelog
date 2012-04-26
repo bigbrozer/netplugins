@@ -1,3 +1,9 @@
+plugin-network (1.2.5) stable; urgency=low
+
+  * check_cisco_cpu.py: fixed exception when cpu name cannot be determined.
+
+ -- Vincent BESANCON <vincent.besancon@faurecia.com>  Thu, 26 Apr 2012 10:43:50 +0200
+
 plugin-network (1.2.4) stable; urgency=low
 
   * Start a new minor version v1.2.4.
