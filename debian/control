@@ -3,7 +3,7 @@ Section: net
 Priority: extra
 Maintainer: Vincent BESANCON <vincent.besancon@faurecia.com>
 Build-Depends: debhelper (>= 8.0.0)
-Standards-Version: 3.9.2
+Standards-Version: 3.9.3
 Vcs-Git: http://monitoring-dc.app.corp/git/plugins/network.git
 Vcs-Browser: http://monitoring-dc.app.corp/git/?p=plugins/network.git
 
