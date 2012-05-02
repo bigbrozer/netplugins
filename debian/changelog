@@ -1,3 +1,11 @@
+plugin-network (1.2.61) stable; urgency=low
+
+  * check_ibm_san_directors_crcs.py: fixed first run detection. refs #1202.
+  * check_ibm_san_directors_crcs.py: fixed average calculation.
+  * check_ibm_san_directors_crcs.py: fixed no description on port.
+
+ -- Vincent BESANCON <vincent.besancon@faurecia.com>  Wed, 02 May 2012 16:20:05 +0200
+
 plugin-network (1.2.6) stable; urgency=low
 
   * Init new plugin to check for CRCs errors on IBM SAN Director.
