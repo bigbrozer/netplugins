@@ -52,8 +52,8 @@ class IBMSanDirectorsCRC(NagiosPluginSNMP):
         self.required_args.add_argument('-r',
                                         dest='avgrec',
                                         type=int,
-                                        default=1,
-                                        help="Make an average for the last <N> records (default to 1).",
+                                        default=2,
+                                        help="Make an average for the last <N> records (default to 2).",
                                         )
         self.required_args.add_argument('-w',
                                         dest='warning',
@@ -71,6 +71,10 @@ class IBMSanDirectorsCRC(NagiosPluginSNMP):
     def verify_plugin_arguments(self):
         super(IBMSanDirectorsCRC, self).verify_plugin_arguments()
 
+        # Number of records
+        if self.options.avgrec < 2: self.unknown('Number of records must be >= 2 to make an average !')
+
+        # Thresholds
         if self.options.warning > self.options.critical:
             self.unknown('Warning threshold cannot be above critical !')
         elif self.options.warning < 0 or self.options.critical < 0:
@@ -130,14 +134,6 @@ plugin = IBMSanDirectorsCRC(version=__version__, description=progdesc)
 # Load any existing pickled data
 retention_data = plugin.load_data()
 
-# Calculate average time
-last_records = retention_data[-plugin.options.avgrec:]
-avg_record_time = 0
-nbr_records = len(retention_data)
-if nbr_records >= plugin.options.avgrec:
-    calc_total_seconds = datetime.fromtimestamp(plugin.runtime) - datetime.fromtimestamp(last_records[0]['timestamp'])
-    avg_record_time = int(math.ceil(calc_total_seconds.total_seconds()/60))
-
 # Prepare SNMP query
 oids = {
     'name': '1.3.6.1.4.1.1588.2.1.1.1.6.2.1.36',
@@ -183,30 +179,48 @@ logger.debug(pformat(snmp_results, indent=4))
 retention_data.append(snmp_results)
 plugin.save_data(retention_data)
 
+# Calculate average time
+last_records = retention_data[-plugin.options.avgrec:]
+avg_record_time = 0
+if len(retention_data) >= plugin.options.avgrec:
+    calc_total_seconds = datetime.fromtimestamp(plugin.runtime) - datetime.fromtimestamp(last_records[0]['timestamp'])
+    avg_record_time = int(math.ceil(calc_total_seconds.total_seconds()/60))
+else:
+    # Stop execution if not enough records in retention file. Wait next check.
+    missing = plugin.options.avgrec - len(retention_data)
+    plugin.unknown('Not enough data to generate average, need %d more checks. Waiting next check.' % missing)
+
 # Calculate CRC increase
 port_stats = {}
 
 logger.debug('-- Processing pickled data for the last %d records.' % plugin.options.avgrec)
 for data in last_records:
+    index = last_records.index(data)
     val = data['values']
+    prev_val = None
+
+    if not index:
+        continue
+    else:
+        prev_val = last_records[index-1]['values']
+        logger.debug("Prev: %s, Next: %s" % (last_records[index-1]['timestamp'], data['timestamp']))
 
     for alias, stat in val.viewitems():
         name = stat['name']
         crc = stat['crc']
+        prev_crc = prev_val[alias]['crc']
+
+        if prev_val:
+            prev_crc = prev_val[alias]['crc']
 
         if not port_stats.has_key(alias):
             port_stats[alias] = {'crc': 0}
 
         port_stats[alias]['name'] = name
-        port_stats[alias]['crc'] += crc
+        port_stats[alias]['crc'] += crc - prev_crc
 
 logger.debug('port_stats:')
 logger.debug(pformat(port_stats, indent=4))
-
-# Stop execution if not enough records in retention file. Wait next check.
-if not avg_record_time:
-    missing = plugin.options.avgrec - nbr_records
-    plugin.unknown('Not enough data to generate average, need %d more checks. Waiting next check.' % missing)
 
 # Define some Nagios related stuff used in output and status
 nagios_output = ""
