@@ -1,3 +1,9 @@
+plugin-network (1.2.62) UNRELEASED; urgency=low
+
+  * check_ibm_san_directors_crcs.py: fixed perfdata data source name.
+
+ -- Vincent BESANCON <vincent.besancon@faurecia.com>  Wed, 02 May 2012 17:25:34 +0200
+
 plugin-network (1.2.61) stable; urgency=low
 
   * check_ibm_san_directors_crcs.py: fixed first run detection. refs #1202.
