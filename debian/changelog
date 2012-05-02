@@ -1,3 +1,11 @@
+plugin-network (1.2.6) stable; urgency=low
+
+  * Init new plugin to check for CRCs errors on IBM SAN Director.
+  * Added requirements to the README file.
+  * Added new plugin check_oftp in collection.
+
+ -- Vincent BESANCON <vincent.besancon@faurecia.com>  Wed, 02 May 2012 11:36:23 +0200
+
 plugin-network (1.2.5) stable; urgency=low
 
   * check_cisco_cpu.py: fixed exception when cpu name cannot be determined.
