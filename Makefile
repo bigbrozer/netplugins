@@ -1,3 +1,7 @@
+default:
+
+full-clean: clean clean-deb
+
 clean: py-bytecode backup-files
 	@dh_clean
 
