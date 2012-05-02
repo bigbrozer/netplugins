@@ -244,7 +244,7 @@ for port, stat in port_stats.viewitems():
     elif stat['crc'] > plugin.options.critical:
         errors['critical'].append(port)
 
-    nagios_perfdata += "\'{name}\'={crc}c;{opt.warning};{opt.critical};0; ".format(crc=stat['crc'], name=port,
+    nagios_perfdata += "\'Port_{name}\'={crc}c;{opt.warning};{opt.critical};0; ".format(crc=stat['crc'], name=port,
                                                                                      opt=plugin.options)
 
 # Show short message in Nagios output
