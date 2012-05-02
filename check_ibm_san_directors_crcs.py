@@ -155,11 +155,15 @@ try:
         alias = [a.pretty() for a in query['alias'] if a.index == port.index ][0]
         crc = [c.value for c in query['crc'] if c.index == port.index ][0]
 
-        if name:
+        if alias:
             if not data.has_key(alias):
                 data[alias] = {}
 
-            data[alias]['name'] = name
+            if name:
+                data[alias]['name'] = name
+            else:
+                data[alias]['name'] = 'No description'
+
             data[alias]['crc'] = crc
 except KeyError:
     # That would mean unexpected result from the query (empty OID, etc...)
@@ -240,7 +244,7 @@ for port, stat in port_stats.viewitems():
     elif stat['crc'] > plugin.options.critical:
         errors['critical'].append(port)
 
-    nagios_perfdata += "\'{name}\'={crc}c;{opt.warning};{opt.critical};0;; ".format(crc=stat['crc'], name=port,
+    nagios_perfdata += "\'{name}\'={crc}c;{opt.warning};{opt.critical};0; ".format(crc=stat['crc'], name=port,
                                                                                      opt=plugin.options)
 
 # Show short message in Nagios output
