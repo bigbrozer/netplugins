@@ -24,6 +24,8 @@ import logging as log
 from pprint import pformat
 import traceback
 from time import time
+from datetime import datetime
+import math
 import os
 import pickle
 
@@ -47,11 +49,11 @@ class IBMSanDirectorsCRC(NagiosPluginSNMP):
         """Add extra specific arguments"""
         super(IBMSanDirectorsCRC, self).define_plugin_arguments()
 
-        self.required_args.add_argument('-d',
-                                        dest='delta',
+        self.required_args.add_argument('-r',
+                                        dest='avgrec',
                                         type=int,
-                                        default=120,
-                                        help="Make an average of <delta> seconds (default to 120 secs).",
+                                        default=1,
+                                        help="Make an average for the last <N> records (default to 1).",
                                         )
         self.required_args.add_argument('-w',
                                         dest='warning',
@@ -113,16 +115,16 @@ oids = {
 query = plugin.snmp.getnext(oids)
 
 # Load any existing pickled data
-pickle_data = plugin.load_data()
+retention_data = plugin.load_data()
 
-# Dictionnary used to store gathered data and used by pickle for saving results (delta)
-results = {
-    'timestamp': plugin.runtime,    # Used for delta (cf. arguments or help)
+# Dictionnary used to store gathered SNMP data and used by pickle for saving results
+snmp_results = {
+    'timestamp': plugin.runtime,
     'values': {},                   # Store SNMP results
 }
 try:
     for port in query['name']:
-        data = results['values']
+        data = snmp_results['values']
         name = port.pretty()
         alias = [a.pretty() for a in query['alias'] if a.index == port.index ][0]
         crc = [c.value for c in query['crc'] if c.index == port.index ][0]
@@ -145,34 +147,32 @@ Please check your plugin configuration first.""" % traceback.format_exc(limit=1)
     plugin.unknown(message)
 
 logger.debug('-- SNMP data:')
-logger.debug(pformat(results, indent=4))
+logger.debug(pformat(snmp_results, indent=4))
 
 # Save to pickle file the new data gathered
-pickle_data.append(results)
-plugin.save_data(pickle_data)
+retention_data.append(snmp_results)
+plugin.save_data(retention_data)
 
-# Search for any valid records that are not older than delta
+# Search for any valid records
 port_stats = {}
 
-logger.debug('-- Processing pickled data.')
-c = 0
-for data in pickle_data:
-    ts = data['timestamp']
+logger.debug('-- Processing pickled data for the last %d records.' % plugin.options.avgrec)
+last_records = retention_data[-plugin.options.avgrec:]
+avg_record_time = datetime.fromtimestamp(plugin.runtime) - datetime.fromtimestamp(last_records[0]['timestamp'])
+avg_record_time = int(math.ceil(avg_record_time.total_seconds()/60))
+for data in last_records:
     val = data['values']
 
-    if (plugin.runtime-ts) <= plugin.options.delta:
-        c += 1
-        for alias, stat in val.viewitems():
-            name = stat['name']
-            crc = stat['crc']
+    for alias, stat in val.viewitems():
+        name = stat['name']
+        crc = stat['crc']
 
-            if not port_stats.has_key(alias):
-                port_stats[alias] = {'crc': 0}
+        if not port_stats.has_key(alias):
+            port_stats[alias] = {'crc': 0}
 
-            port_stats[alias]['name'] = name
-            port_stats[alias]['crc'] += crc
+        port_stats[alias]['name'] = name
+        port_stats[alias]['crc'] += crc
 
-logger.debug('-- Processed %d values.' % c)
 logger.debug('port_stats:')
 logger.debug(pformat(port_stats, indent=4))
 
@@ -202,16 +202,20 @@ nbr_warn = len(errors['warning'])
 nbr_crit = len(errors['critical'])
 if not nbr_warn and not nbr_crit:
     nagios_status = plugin.ok
-    nagios_output = "No CRC error detected on ports."
+    nagios_output = "No CRC error detected on ports. (Average on last %s mins)" % avg_record_time
 elif nbr_warn and not nbr_crit:
     nagios_status = plugin.warning
-    nagios_output = "%d ports have warnings CRC errors !\n" % nbr_warn
+    nagios_output = "%d ports have warnings CRC errors ! (Average on last %s mins)\n" % (nbr_warn, avg_record_time)
 elif nbr_crit and not nbr_warn:
     nagios_status = plugin.critical
-    nagios_output = "%d ports have criticals CRC errors !\n" % nbr_crit
+    nagios_output = "%d ports have criticals CRC errors ! (Average on last %s mins)\n" % (nbr_crit, avg_record_time)
 elif nbr_warn and nbr_crit:
     nagios_status = plugin.critical
-    nagios_output = "%d ports have criticals, %d ports have warnings CRC errors !\n" % (nbr_crit, nbr_warn)
+    nagios_output = "%d ports have criticals, %d ports have warnings CRC errors ! (Average on last %s mins)\n" % (
+        nbr_crit,
+        nbr_warn,
+        avg_record_time
+        )
 
 # Check for errors details in long output
 for status in errors:
