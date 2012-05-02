@@ -58,13 +58,13 @@ class IBMSanDirectorsCRC(NagiosPluginSNMP):
         self.required_args.add_argument('-w',
                                         dest='warning',
                                         type=int,
-                                        help="Warn if average number of CRCs are above this threshold (see DELTA).",
+                                        help="Warn if average number of CRCs are above this threshold.",
                                         required=True,
                                         )
         self.required_args.add_argument('-c',
                                         dest='critical',
                                         type=int,
-                                        help="Crit if average number of CRCs are above this threshold (see DELTA).",
+                                        help="Crit if average number of CRCs are above this threshold.",
                                         required=True,
                                         )
 
@@ -127,6 +127,17 @@ progdesc = 'Check IBM SAN Directors for CRCs on ports.'
 
 plugin = IBMSanDirectorsCRC(version=__version__, description=progdesc)
 
+# Load any existing pickled data
+retention_data = plugin.load_data()
+
+# Calculate average time
+last_records = retention_data[-plugin.options.avgrec:]
+avg_record_time = 0
+nbr_records = len(retention_data)
+if nbr_records >= plugin.options.avgrec:
+    calc_total_seconds = datetime.fromtimestamp(plugin.runtime) - datetime.fromtimestamp(last_records[0]['timestamp'])
+    avg_record_time = int(math.ceil(calc_total_seconds.total_seconds()/60))
+
 # Prepare SNMP query
 oids = {
     'name': '1.3.6.1.4.1.1588.2.1.1.1.6.2.1.36',
@@ -135,9 +146,6 @@ oids = {
 }
 
 query = plugin.snmp.getnext(oids)
-
-# Load any existing pickled data
-retention_data = plugin.load_data()
 
 # Dictionnary used to store gathered SNMP data and used by pickle for saving results
 snmp_results = {
@@ -175,19 +183,10 @@ logger.debug(pformat(snmp_results, indent=4))
 retention_data.append(snmp_results)
 plugin.save_data(retention_data)
 
-# Search for any valid records
+# Calculate CRC increase
 port_stats = {}
 
 logger.debug('-- Processing pickled data for the last %d records.' % plugin.options.avgrec)
-last_records = retention_data[-plugin.options.avgrec:]
-
-# Calculate average time period
-if len(last_records) > 1:
-    avg_record_time = datetime.fromtimestamp(plugin.runtime) - datetime.fromtimestamp(last_records[0]['timestamp'])
-    avg_record_time = int(math.ceil(avg_record_time.total_seconds()/60))
-else:
-    avg_record_time = 0
-
 for data in last_records:
     val = data['values']
 
@@ -203,6 +202,11 @@ for data in last_records:
 
 logger.debug('port_stats:')
 logger.debug(pformat(port_stats, indent=4))
+
+# Stop execution if not enough records in retention file. Wait next check.
+if not avg_record_time:
+    missing = plugin.options.avgrec - nbr_records
+    plugin.unknown('Not enough data to generate average, need %d more checks. Waiting next check.' % missing)
 
 # Define some Nagios related stuff used in output and status
 nagios_output = ""
@@ -241,11 +245,8 @@ elif nbr_warn and nbr_crit:
     nagios_status = plugin.critical
     nagios_output = "%d ports have criticals, %d ports have warnings CRC errors !" % (nbr_crit, nbr_warn)
 
-# Show average record time if this is not the first run
-if avg_record_time:
-    nagios_output = "%s (Average on last %s mins)" % (nagios_output, avg_record_time)
-else:
-    nagios_output = "%s (First run)" % nagios_output
+# Show average record time
+nagios_output = "%s (Average on last %s mins)" % (nagios_output, avg_record_time)
 
 # Check for errors details in long output
 for status in errors:
