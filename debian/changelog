@@ -1,4 +1,10 @@
-plugin-network (1.2.62) UNRELEASED; urgency=low
+plugin-network (1.2.63) stable; urgency=low
+
+  * check_ibm_san_directors_crcs.py: removed the pickle part. Now part of the monitoring python package since v1.0.51.
+
+ -- Vincent BESANCON <vincent.besancon@faurecia.com>  Thu, 31 May 2012 15:33:02 +0200
+
+plugin-network (1.2.62) stable; urgency=low
 
   * check_ibm_san_directors_crcs.py: fixed perfdata data source name.
 
