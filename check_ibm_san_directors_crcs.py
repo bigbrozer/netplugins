@@ -26,8 +26,6 @@ import traceback
 from time import time
 from datetime import datetime
 import math
-import os
-import pickle
 
 from shared import __version__
 from monitoring.nagios.plugin import NagiosPluginSNMP
@@ -40,10 +38,9 @@ class IBMSanDirectorsCRC(NagiosPluginSNMP):
     def initialize(self):
         super(IBMSanDirectorsCRC, self).initialize()
 
-        # Data retention across execution
+        # Timestamp at execution
         self.runtime = time()
         logger.debug('-- Plugin runtime: %s' % self.runtime)
-        self.picklefile = '/var/tmp/{plugin.name}_{opt.hostname}.pkl'.format(plugin=self, opt=self.options)
 
     def define_plugin_arguments(self):
         """Add extra specific arguments"""
@@ -80,51 +77,6 @@ class IBMSanDirectorsCRC(NagiosPluginSNMP):
         elif self.options.warning < 0 or self.options.critical < 0:
             self.unknown('Warning / Critical threshold cannot be below zero !')
 
-    def load_data(self):
-        """Load pickled data."""
-        logger.debug('-- Try to find pickle file \'%s\'...' % self.picklefile)
-
-        if os.path.isfile(self.picklefile):
-            logger.debug('\t - Pickle file is found, processing.')
-
-            data = list()
-            try:
-                with open(self.picklefile, 'rb') as pkl:
-                    data = pickle.load(pkl)
-            except (IOError, IndexError):
-                message = """Unable to read retention file !
-If you see this message that would mean that the retention file located in \'%s\' exists but it is not readable. Check
-permissions or try to delete it to generate a new one. It may be possible that this version of this plugin has
-changed and the retention file is outdated, so delete it if this is the case.
-
-%s
-""" % (self.picklefile, traceback.format_exc(limit=1))
-                plugin.unknown(message)
-
-            logger.debug('\t - Pickle data found, loading %d records.' % len(data))
-            return data
-        else:
-            logger.debug('\t - Pickle file not found, creates.')
-            return list()
-
-    def save_data(self, data):
-        """Save data into a pickle file."""
-        logger.debug('-- Saving data to file \'%s\'...' % self.picklefile)
-        try:
-            with open(self.picklefile, 'wb') as pkl:
-                # Avoid having a large pickle file if above 100 recorded values (plugin executions)
-                if len(data) > 100:
-                    logger.debug('\t - Records limit reached, purging old records.')
-                    del data[0]
-                pickle.dump(data, pkl)
-        except IOError:
-            message = """Unable to save retention file !
-If you see this message that would mean that the retention file located in \'%s\' is not writable. Check permissions.
-
-%s
-""" % (self.picklefile, traceback.format_exc(limit=1))
-            plugin.unknown(message)
-
 
 # Init plugin
 progdesc = 'Check IBM SAN Directors for CRCs on ports.'
@@ -132,7 +84,12 @@ progdesc = 'Check IBM SAN Directors for CRCs on ports.'
 plugin = IBMSanDirectorsCRC(version=__version__, description=progdesc)
 
 # Load any existing pickled data
-retention_data = plugin.load_data()
+try:
+    # Load retention data
+    retention_data = plugin.load_data()
+except IOError:
+    # No retention data to load
+    retention_data = []
 
 # Prepare SNMP query
 oids = {
