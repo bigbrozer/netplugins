@@ -138,7 +138,7 @@ logger.debug(pformat(snmp_results, indent=4))
 
 # Save to pickle file the new data gathered
 retention_data.append(snmp_results)
-plugin.save_data(retention_data)
+plugin.save_data(retention_data, limit=50)
 
 # Calculate average time
 last_records = retention_data[-plugin.options.avgrec:]
