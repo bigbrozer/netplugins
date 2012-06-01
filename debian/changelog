@@ -1,3 +1,9 @@
+plugin-network (1.2.64) stable; urgency=low
+
+  * check_ibm_san_directors_crcs.py: limit number of retention records to 50.
+
+ -- Vincent BESANCON <vincent.besancon@faurecia.com>  Fri, 01 Jun 2012 14:14:30 +0200
+
 plugin-network (1.2.63) stable; urgency=low
 
   * check_ibm_san_directors_crcs.py: removed the pickle part. Now part of the monitoring python package since v1.0.51.
