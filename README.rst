@@ -6,9 +6,9 @@ Collection of scripts (plugins) to be used by Nagios or Shinken in order to chec
 Requirements
 ------------
 
-- `monitoring <https://github.com/bigbrozer/monitoring>`_ package.
+- `monitoring.nagios <https://github.com/bigbrozer/monitoring.nagios>`_ package.
 
-To install using pip: ``$ pip install --upgrade git+http://github.com/bigbrozer/monitoring.git``.
+To install using pip: ``$ pip install --upgrade git+http://github.com/bigbrozer/monitoring.nagios.git``.
 
 Download
 --------
