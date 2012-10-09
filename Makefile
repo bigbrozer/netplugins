@@ -1,6 +1,6 @@
 default:
 
-full-clean: clean clean-deb
+distclean: clean clean-deb
 
 clean: py-bytecode backup-files
 	@dh_clean

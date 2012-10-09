@@ -18,30 +18,5 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #===============================================================================
 
-from fabric.api import task, cd, roles, hosts, put, run, local
-from monitoring.fabric import servers
+from monitoring.fabric import package
 
-@task
-@roles('central')
-def upload():
-    """Upload Debian package to central APT repository."""
-    run('rm -f /var/www/packages/apt/plugin-network_*.deb')
-    run('rm -f /var/www/packages/apt/plugin-check-snmpnetstat_*.deb')
-    put('pkg-build/*.deb', '/var/www/packages/apt')
-    with cd('/var/www/packages/apt'):
-        run('dpkg-scanpackages -m . > Packages')
-        run('apt-ftparchive release . > Release')
-        run('gpg --output Release.gpg -ba Release')
-
-@task
-@hosts('localhost')
-def build():
-    """Build the package."""
-    local("git-buildpackage")
-    local("lintian pkg-build/*.dsc")
-
-@task
-@hosts('localhost')
-def tag():
-    """Tag package version."""
-    local("git-buildpackage --git-tag-only")
