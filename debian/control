@@ -9,7 +9,7 @@ Vcs-Browser: http://monitoring-dc.app.corp/git/?p=plugins/network.git
 
 Package: plugin-network
 Architecture: all
-Depends: ${misc:Depends}, perl (>= 5.10), python (<< 2.8)
+Depends: ${misc:Depends}, perl (>= 5.10), python (<< 2.8), libnet-snmp-perl
 Description: Nagios/Shinken Network Plugins Collection
  This is the package to install Nagios/Shinken Network Plugins used to
  check Cisco/Nortel/Extreme equipments and other network related stuff.

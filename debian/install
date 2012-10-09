@@ -8,5 +8,6 @@ check_cisco_temp.py             usr/lib/faurecia/plugins/net
 check_snmpnetstat.py            usr/lib/faurecia/plugins/net
 check_ibm_san_directors_crcs.py usr/lib/faurecia/plugins/net
 check_oftp.py                   usr/lib/faurecia/plugins/net
+sgichk_sansw_ports.pl           usr/lib/faurecia/plugins/net
 shared.py                       usr/lib/faurecia/plugins/net
 contrib                         usr/lib/faurecia/plugins/net
