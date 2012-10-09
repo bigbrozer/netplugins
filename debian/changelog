@@ -1,3 +1,14 @@
+plugin-network (1.2.70) stable; urgency=low
+
+  [ Vincent BESANCON ]
+  * Updated README. Changed name of dependency.
+
+  [ Mohamed CHERROUD ]
+  * Updated fabfile and Makefile for monitoring.fabric v1.2.x.
+  * Add SAN Switch check ports plug-in (which monitor if the port is operationally up)
+
+ -- Mohamed CHERROUD <mohamed.cherroud-ext@faurecia.com>  Tue, 09 Oct 2012 11:58:18 +0200
+
 plugin-network (1.2.64) stable; urgency=low
 
   * check_ibm_san_directors_crcs.py: limit number of retention records to 50.
