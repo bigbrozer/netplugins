@@ -1,3 +1,9 @@
+plugin-network (1.2.81) stable; urgency=low
+
+  * Update the output in multiple lines.
+
+ -- Mohamed CHERROUD <mohamed.cherroud-ext@faurecia.com>  Wed, 26 Dec 2012 09:07:06 +0100
+
 plugin-network (1.2.80) stable; urgency=low
 
   * Add new plug-in for check HSRP
