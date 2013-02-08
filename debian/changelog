@@ -1,3 +1,18 @@
+plugin-network (1.2.82) quantal; urgency=low
+
+  [ Mohamed CHERROUD ]
+  * Update plug-in following the Network Technical Desk : For all incidents =>
+    Only Warning case. Replace "hsrp group" by "Vlan". Delete the InfIndex
+    information.
+
+  [ Vincent BESANCON ]
+  * Removed project gitignore.
+  * [idea] share Pycharm configuration.
+  * [oftp] added timeout support when receiving data, avoid infinite loop.
+    refs #1914.
+
+ -- Vincent BESANCON <besancon.vincent@gmail.com>  Fri, 08 Feb 2013 14:32:06 +0100
+
 plugin-network (1.2.81) stable; urgency=low
 
   * Update the output in multiple lines.
@@ -17,7 +32,8 @@ plugin-network (1.2.70) stable; urgency=low
 
   [ Mohamed CHERROUD ]
   * Updated fabfile and Makefile for monitoring.fabric v1.2.x.
-  * Add SAN Switch check ports plug-in (which monitor if the port is operationally up)
+  * Add SAN Switch check ports plug-in (which monitor if the port is
+    operationally up)
 
  -- Mohamed CHERROUD <mohamed.cherroud-ext@faurecia.com>  Tue, 09 Oct 2012 11:58:18 +0200
 
@@ -29,7 +45,8 @@ plugin-network (1.2.64) stable; urgency=low
 
 plugin-network (1.2.63) stable; urgency=low
 
-  * check_ibm_san_directors_crcs.py: removed the pickle part. Now part of the monitoring python package since v1.0.51.
+  * check_ibm_san_directors_crcs.py: removed the pickle part. Now part of the
+    monitoring python package since v1.0.51.
 
  -- Vincent BESANCON <vincent.besancon@faurecia.com>  Thu, 31 May 2012 15:33:02 +0200
 
@@ -64,17 +81,24 @@ plugin-network (1.2.5) stable; urgency=low
 plugin-network (1.2.4) stable; urgency=low
 
   * Start a new minor version v1.2.4.
-  * check_cisco_config.py: update because of changes introduced in monitoring package v1.0.4.
-  * check_cisco_cpu.py: update because of changes introduced in monitoring package v1.0.4.
+  * check_cisco_config.py: update because of changes introduced in monitoring
+    package v1.0.4.
+  * check_cisco_cpu.py: update because of changes introduced in monitoring
+    package v1.0.4.
   * check_cisco_cpu.py: add more arguments validation for thresholds.
   * check_cisco_config.py: updated to make use of OidValue attributes.
   * check_cisco_cpu.py: updated to make use of OidValue attributes.
-  * check_cisco_hard.py: update because of changes introduced in monitoring package v1.0.4.
-  * check_cisco_hsrp.py: update because of changes introduced in monitoring package v1.0.4.
-  * check_cisco_temp.py: update because of changes introduced in monitoring package v1.0.4.
+  * check_cisco_hard.py: update because of changes introduced in monitoring
+    package v1.0.4.
+  * check_cisco_hsrp.py: update because of changes introduced in monitoring
+    package v1.0.4.
+  * check_cisco_temp.py: update because of changes introduced in monitoring
+    package v1.0.4.
   * check_snmpnetstat.py: added --version.
-  * Extreme plugins: we do not have anymore devices from this brand. Deleted plugins.
-  * Fabfile: launch apt-ftparchive on central to generate Release file and sign it.
+  * Extreme plugins: we do not have anymore devices from this brand. Deleted
+    plugins.
+  * Fabfile: launch apt-ftparchive on central to generate Release file and
+    sign it.
 
  -- Vincent BESANCON <vincent.besancon@faurecia.com>  Wed, 25 Apr 2012 17:38:35 +0200
 
@@ -89,7 +113,8 @@ plugin-network (1.2.3) stable; urgency=low
   * check_cisco_temp.py: use monitoring 1.0.2.
   * check_extreme_hard.py: use monitoring 1.0.2.
   * check_extreme_vrrp.py: use monitoring 1.0.2.
-  * check_snmpnetstat.py: use shared module to have the current plugin version.
+  * check_snmpnetstat.py: use shared module to have the current plugin
+    version.
   * Package: install file shared.py.
   * Fabfile: added tasks to build and tag the package.
 
