@@ -24,14 +24,21 @@
 
 import socket
 import optparse
+import logging
+import time
+
+
+logging.basicConfig(level=logging.ERROR)
+logger = logging.getLogger('plugin')
 
 # Create OptionParser instance
 argparser = optparse.OptionParser()
 
 # Defining plugin arguments
 argparser.add_option("-H", dest="hostname", help="OFTP server address")
-argparser.add_option("-p", dest="port", help="OFTP server port", type="int")
-argparser.add_option("-t", dest="timeout", help="Response timeout (default: 5 secs)", type="float", default="5.0")
+argparser.add_option("-p", dest="port", help="OFTP server port", type=int)
+argparser.add_option("-t", dest="timeout", help="Response timeout (default: 30 secs)", type=float, default="30")
+argparser.add_option("--debug", dest="debug", help="Enable debugging", action='store_true')
 
 # Tell OptionParser to parse all args and return their values
 arguments = argparser.parse_args()[0]
@@ -41,27 +48,47 @@ if not arguments.hostname or not arguments.port:
     print "UNKNOWN - Syntax error, missing connection information !"
     raise SystemExit(3)
 
+# Enable debug messages ?
+if arguments.debug:
+    logger.setLevel(logging.DEBUG)
+
 # Establish a connection and catch any possible error
 try:
     s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    s.settimeout(arguments.timeout)
     s.connect((arguments.hostname, arguments.port))
+    s.setblocking(0)
+
+    logger.debug('Successfully connected to socket.')
 except socket.error:
     print "CRITICAL - Cannot establish a connection to OFTP server !"
     raise SystemExit(2)
 
-# Set socket timeout, answer should be given in this amount af seconds
-s.settimeout(arguments.timeout)
-
 # Get data from the server and process response
+nagios_output = ""
 try:
+    start_time = time.time()
+
     while 1:
-        data = s.recv(32)
-        result = data.decode('utf-8')
-        if "READY" in result:
-            nagios_output = "OK - OFTP server is available."
-            raise SystemExit(0)
+        # Break if timeout is reached
+        remaining_time = time.time()-start_time
+        if remaining_time > arguments.timeout:
+            logger.error('Timeout reached')
+            nagios_output = "CRITICAL - OFTP server is reachable but no data was received !"
+            raise SystemExit(2)
+
+        # Get some data from socket
+        try:
+            data = s.recv(32)
+            result = data.decode('utf-8')
+            if "READY" in result:
+                nagios_output = "OK - OFTP server is available."
+                raise SystemExit(0)
+        except socket.error:
+            # No data yet, make CPU happy ;-)
+            time.sleep(0.1)
 except socket.timeout:
-    nagios_output = "CRITICAL - OFTP server is reachable but did not answered in time !"
+    nagios_output = "CRITICAL - Unable to connect to OFTP server within %d seconds !" % arguments.timeout
     raise SystemExit(2)
 finally:
     s.close()
